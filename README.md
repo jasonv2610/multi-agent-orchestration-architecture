@@ -46,7 +46,7 @@ Agents operate independently against dedicated data stores and are bound by expl
 The system is organized into five logical layers. This public showcase includes the first three; the final two are private.
 
 **Workflows**
-The automation layer. Contains the master orchestrator, six domain agents, a scheduling sub-pipeline, error handler, and helper utilities. Workflows are version-controlled and validated against declared contracts before deployment. No workflow is ever deleted from production — deprecated logic is deactivated or superseded.
+The automation layer. Contains the master orchestrator, six domain agents, a scheduling sub-pipeline, error handler, and helper utilities. Workflows are version-controlled and validated against declared contracts before deployment. No workflow is ever deleted from production -deprecated logic is deactivated or superseded.
 
 **Governance**
 The contract and policy layer. Declares input/output schemas for each agent, routing policy, caching policy, verification thresholds, and versioning rules. A pre-commit validation gate enforces contract compliance before any workflow change reaches the repository.
@@ -54,7 +54,7 @@ The contract and policy layer. Declares input/output schemas for each agent, rou
 **Registry**
 The configuration SSOT layer. Centralizes all data store references, credential identifiers, routing rules, and cache class definitions. Workflows resolve identifiers at runtime from the registry; no environment-specific values are hard-coded into the workflow logic.
 
-**Integrations** *(conceptual — credentials and endpoints are private)*
+**Integrations** *(conceptual -credentials and endpoints are private)*
 The external service layer. Organized into four categories: AI and reasoning services, data storage backends, communication interfaces, and developer tooling. All integration credentials are managed outside the repository.
 
 **Documentation** *(private)*
@@ -62,7 +62,7 @@ Internal knowledge base, prompt templates, n8n execution standards, debugging pa
 
 ## Execution Example
 
-**Input:** Voice message — "86 the salmon" (mark menu item as unavailable)
+**Input:** Voice message -"86 the salmon" (mark menu item as unavailable)
 
 1. Messaging interface receives the voice attachment and passes it to the orchestrator
 2. Orchestrator routes audio through a speech-to-text transcription node
@@ -95,10 +95,10 @@ Published materials reflect architectural and structural decisions only. Functio
 
 ## Design Principles
 
-- **Configuration over hardcoding** — Environment-specific values reside in a centralized registry, never inside workflow logic.
-- **Contracts over assumptions** — Every agent declares explicit input/output schemas enforced at commit time.
-- **Validation before delegation** — Low-confidence intent triggers clarification rather than speculative routing.
-- **Abstraction over coupling** — Agents share no direct dependencies; coordination flows through the orchestrator.
+- **Configuration over hardcoding** -Environment-specific values reside in a centralized registry, never inside workflow logic.
+- **Contracts over assumptions** -Every agent declares explicit input/output schemas enforced at commit time.
+- **Validation before delegation** -Low-confidence intent triggers clarification rather than speculative routing.
+- **Abstraction over coupling** -Agents share no direct dependencies; coordination flows through the orchestrator.
 
 ## License
 
