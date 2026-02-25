@@ -1,19 +1,20 @@
 # Multi-Agent Orchestration Architecture
 
-A multi-agent personal automation system built on n8n Cloud. Routes incoming requests across six specialized domains — productivity, finance, operations, research, growth, and document processing — through a central intent classification layer.
-
----
+A contract-first, registry-driven multi-agent orchestration architecture deployed on n8n Cloud. The system routes structured and unstructured inputs across specialized domain agents using deterministic routing and confidence-governed intent classification.
 
 ## Architecture Overview
 
-A central orchestrator receives input from multiple channels — text, voice, and image — classifies intent using an LLM routing layer, and delegates to the appropriate domain agent. Each agent operates independently against dedicated data stores. All agents share a common error recovery contract; a self-healing error handler monitors execution failures and applies autonomous remediation without human intervention.
+A central orchestrator receives input from multiple channels, text, voice, and image, classifies intent using a routing layer, and delegates execution to an appropriate domain agent.
 
-**Runtime:** n8n Cloud
-**User interface:** Telegram (text, voice, image)
-**Developer interface:** Claude Code via MCP
-**Version:** 2.2.0
+Agents operate independently against dedicated data stores and are bound by explicit input and output contracts. Execution failures are intercepted by a recovery layer that applies remediation patterns without direct human intervention.
 
----
+| Attribute | Value |
+|------------|-------|
+| Runtime | n8n Cloud |
+| User Interface | Telegram |
+| Developer Interface | Claude Code via MCP |
+| Version | 2.2.0 |
+
 
 ## System Layers
 
@@ -40,8 +41,6 @@ A central orchestrator receives input from multiple channels — text, voice, an
 └──────────────────────────────────────────────────┘
 ```
 
----
-
 ## Repository Structure
 
 The system is organized into five logical layers. This public showcase includes the first three; the final two are private.
@@ -53,15 +52,13 @@ The automation layer. Contains the master orchestrator, six domain agents, a sch
 The contract and policy layer. Declares input/output schemas for each agent, routing policy, caching policy, verification thresholds, and versioning rules. A pre-commit validation gate enforces contract compliance before any workflow change reaches the repository.
 
 **Registry**
-The configuration SSOT layer. Centralizes all data store references, credential identifiers, routing rules, and cache class definitions. Workflows resolve identifiers at runtime from the registry; no environment-specific values are hardcoded in workflow logic.
+The configuration SSOT layer. Centralizes all data store references, credential identifiers, routing rules, and cache class definitions. Workflows resolve identifiers at runtime from the registry; no environment-specific values are hard-coded into the workflow logic.
 
 **Integrations** *(conceptual — credentials and endpoints are private)*
 The external service layer. Organized into four categories: AI and reasoning services, data storage backends, communication interfaces, and developer tooling. All integration credentials are managed outside the repository.
 
 **Documentation** *(private)*
 Internal knowledge base, prompt templates, n8n execution standards, debugging patterns, and operational runbooks. Not included in this public showcase.
-
----
 
 ## Execution Example
 
@@ -74,8 +71,6 @@ Internal knowledge base, prompt templates, n8n execution standards, debugging pa
 5. Agent updates the inventory data store with availability status and timestamp
 6. Confirmation is synthesized to audio and returned as a voice reply
 
----
-
 ## Core Capabilities
 
 - Text, voice, and image input processing
@@ -85,8 +80,6 @@ Internal knowledge base, prompt templates, n8n execution standards, debugging pa
 - Autonomous error detection and self-healing via AI-assisted workflow repair
 - Registry-driven configuration with no hardcoded identifiers in workflow logic
 - Spec-defined agent contracts enforced by pre-commit validation
-
----
 
 ## Scope and Exclusions
 
@@ -100,14 +93,13 @@ This repository is a curated public showcase of architecture, workflow structure
 
 Published materials reflect architectural and structural decisions only. Functional reproduction requires environment configuration not available in this repository.
 
----
+## Design Principles
 
-## Design Philosophy
-
-Configuration over hardcoding — all environment-specific values live in a centralized registry, never inside workflow logic. Contracts over assumptions — every agent declares an explicit input/output schema enforced at commit time, not discovered at runtime. Validation before delegation — intent below confidence threshold returns a clarification request; the system never routes on a guess. Abstraction over coupling — agents share no direct dependencies; all coordination flows through the orchestrator against declared interfaces.
-
----
+- **Configuration over hardcoding** — Environment-specific values reside in a centralized registry, never inside workflow logic.
+- **Contracts over assumptions** — Every agent declares explicit input/output schemas enforced at commit time.
+- **Validation before delegation** — Low-confidence intent triggers clarification rather than speculative routing.
+- **Abstraction over coupling** — Agents share no direct dependencies; coordination flows through the orchestrator.
 
 ## License
 
-See [LICENSE.md](LICENSE.md) for terms governing use of the published code and documentation.
+Refer to [LICENSE.md](LICENSE.md) for licensing terms.
