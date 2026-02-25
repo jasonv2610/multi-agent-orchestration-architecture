@@ -20,24 +20,24 @@ Agents operate independently against dedicated data stores and are bound by expl
 
 ```
 ┌──────────────────────────────────────────────────┐
-│  Workflows                                        │
-│  Orchestration · Domain Agents · Error Handler    │
-│  Scheduling Pipeline · Helper Utilities           │
+│  Workflows                                       │
+│  Orchestration · Domain Agents · Error Handler   │
+│  Scheduling Pipeline · Helper Utilities          │
 ├──────────────────────────────────────────────────┤
-│  Governance                                       │
-│  Agent Contracts · Routing Policy                 │
-│  Caching Policy · Verification Policy             │
-│  Version Validation · Pre-commit Gates            │
+│  Governance                                      │
+│  Agent Contracts · Routing Policy                │
+│  Caching Policy · Verification Policy            │
+│  Version Validation · Pre-commit Gates           │
 ├──────────────────────────────────────────────────┤
-│  Registry (SSOT)                                  │
-│  Data Store References · Credential Identifiers   │
-│  Routing Rules · Cache Class Definitions          │
+│  Registry (SSOT)                                 │
+│  Data Store References · Credential Identifiers  │
+│  Routing Rules · Cache Class Definitions         │
 ├──────────────────────────────────────────────────┤
-│  Knowledge  ·········· (private)                  │
-│  Prompt Templates · n8n Standards · RAG Patterns  │
+│  Knowledge  ·········· (private)                 │
+│  Prompt Templates · n8n Standards · RAG Patterns │
 ├──────────────────────────────────────────────────┤
-│  Operations  ········· (private)                  │
-│  Self-healing · Debugging Patterns · Audit Tools  │
+│  Operations  ········· (private)                 │
+│  Self-healing · Debugging Patterns · Audit Tools │
 └──────────────────────────────────────────────────┘
 ```
 
