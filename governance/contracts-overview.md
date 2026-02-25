@@ -1,14 +1,12 @@
-# Agent Contracts — Overview
+# Agent Contracts - Overview
 
 ## Purpose
 
 Each domain agent declares a formal input/output contract that specifies what the orchestrator must provide and what the agent guarantees in return. Contracts serve three functions:
 
-1. **Validation gate** — pre-commit hooks reject workflow changes that break a declared contract
-2. **Documentation** — contracts are the authoritative description of each agent's interface
-3. **Testing anchor** — integration tests assert contract compliance before deployment
-
----
+1. **Validation gate** - pre-commit hooks reject workflow changes that break a declared contract
+2. **Documentation** - contracts are the authoritative description of each agent's interface
+3. **Testing anchor** - integration tests assert contract compliance before deployment
 
 ## Contract Structure
 
@@ -35,11 +33,9 @@ Every agent contract declares:
 
 Contracts are enforced at two points:
 
-**At commit time** — A validation script checks all workflow JSON files against their declared contracts. Commits that produce contract violations are blocked.
+**At commit time** - A validation script checks all workflow JSON files against their declared contracts. Commits that produce contract violations are blocked.
 
-**At runtime** — The orchestrator validates the dispatch payload before invoking an agent. Invalid payloads are rejected with a structured error rather than passed to the agent.
-
----
+**At runtime** - The orchestrator validates the dispatch payload before invoking an agent. Invalid payloads are rejected with a structured error rather than passed to the agent.
 
 ## Versioning
 
@@ -49,11 +45,9 @@ Contracts are versioned alongside workflows. A contract version increment is req
 - An existing output field is removed or renamed
 - The error shape changes
 
-Minor changes (adding optional fields, expanding enum values) do not require a version bump.
-
----
+Minor changes (e.g., adding optional fields or expanding enum values) do not require a version bump.
 
 ## See Also
 
-- `governance/policy-summary.md` — routing, caching, and verification policies
-- `examples/redacted-agent-contract.yaml` — sanitized example contract structure
+- `governance/policy-summary.md` - routing, caching, and verification policies
+- `examples/redacted-agent-contract.yaml` - sanitized example contract structure
