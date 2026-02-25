@@ -1,0 +1,62 @@
+{
+  "_description": "Sanitized example showing registry structure. All IDs and values are placeholders.",
+  "_version": "2.x",
+
+  "data_stores": {
+    "operations_sheet": {
+      "type": "google_sheets",
+      "logical_name": "operations_sheet",
+      "id": "<REDACTED_SHEET_ID>",
+      "tabs": ["Inventory", "QuickLog", "ErrorLog"]
+    },
+    "finance_sheet": {
+      "type": "google_sheets",
+      "logical_name": "finance_sheet",
+      "id": "<REDACTED_SHEET_ID>",
+      "tabs": ["Expenses", "Categories"]
+    },
+    "knowledge_base": {
+      "type": "supabase",
+      "logical_name": "knowledge_base",
+      "table": "documents",
+      "match_function": "match_documents"
+    },
+    "response_cache": {
+      "type": "redis",
+      "logical_name": "response_cache",
+      "ttl_classes": ["no_cache", "short", "medium", "long", "reference"]
+    }
+  },
+
+  "file_storage": {
+    "receipts_folder": {
+      "type": "google_drive",
+      "logical_name": "receipts_folder",
+      "id": "<REDACTED_FOLDER_ID>"
+    },
+    "documents_folder": {
+      "type": "google_drive",
+      "logical_name": "documents_folder",
+      "id": "<REDACTED_FOLDER_ID>"
+    }
+  },
+
+  "credentials": {
+    "_note": "Credential logical names only. No secrets stored here.",
+    "google_workspace": "google-oauth2-credential",
+    "openai": "openai-api-credential",
+    "supabase": "supabase-api-credential",
+    "telegram": "telegram-bot-credential",
+    "elevenlabs": "elevenlabs-api-credential"
+  },
+
+  "cache_ttl_classes": {
+    "no_cache":  { "ttl_seconds": 0,      "use_case": "Real-time data" },
+    "short":     { "ttl_seconds": 300,    "use_case": "High-frequency status" },
+    "medium":    { "ttl_seconds": 3600,   "use_case": "General queries" },
+    "long":      { "ttl_seconds": 86400,  "use_case": "Research and analysis" },
+    "reference": { "ttl_seconds": 604800, "use_case": "Stable definitions" }
+  },
+
+  "cache_key_format": "system:{agent_id}:{user_context_hash}:{query_hash}"
+}
