@@ -5,7 +5,7 @@ agent: "[Domain] Agent"
 version: "2.x"
 domain: "[bounded context — e.g., productivity | finance | operations]"
 
-# ─── INPUT ────────────────────────────────────────────────────────────────────
+# INPUT 
 
 input:
   required:
@@ -36,7 +36,7 @@ input:
       type: string
       description: Opaque hash used as cache key scope. Not exposed to agent logic.
 
-# ─── OUTPUT ───────────────────────────────────────────────────────────────────
+#  OUTPUT
 
 output:
   guaranteed:
@@ -82,7 +82,7 @@ output:
       type: boolean
       description: Whether the orchestrator should attempt retry
 
-# ─── CONSTRAINTS ──────────────────────────────────────────────────────────────
+# CONSTRAINTS 
 
 constraints:
   max_execution_ms: "[policy-defined]"
@@ -91,7 +91,7 @@ constraints:
   max_retries: 2
   requires_data_store_write: "[true | false — domain-specific]"
 
-# ─── VERSIONING ───────────────────────────────────────────────────────────────
+# VERSIONING
 
 versioning:
   breaking_change_triggers_bump:
