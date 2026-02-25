@@ -6,13 +6,15 @@ All rights reserved.
 
 This repository contains architectural documentation and sanitized examples published for portfolio and reference purposes.
 
-**Permitted:**
+## Permitted Use
+
 - Viewing and referencing the architectural patterns described in this repository
 - Implementing similar design patterns in independent, original systems
 - Linking to or citing this repository in professional contexts
 
-**Not permitted:**
-- Reproducing, distributing, or modifying the content of this repository without written permission
+## Restrictions
+
+- Reproducing or redistributing repository content without permission
 - Modifying and republishing repository materials
 - Representing repository content as your own original work
 
