@@ -2,16 +2,18 @@
 
 ## Problem
 
-In workflow automation systems, data store references — spreadsheet IDs, database connection strings, folder identifiers, API endpoint URLs — are commonly hardcoded directly inside workflow nodes. This creates several failure modes:
+In workflow automation systems, environment-specific identifiers such as spreadsheet IDs, database names, folder ID, and API endpoints are often hardcoded directly inside workflow nodes. This introduces structural risk:
 
-- Configuration values are duplicated across dozens of nodes and workflows
-- A single ID change requires hunting down every reference manually
-- The same ID may appear differently in different workflows (stale copies)
-- There is no authoritative record of what connects to what
+- Configuration values become duplicated across workflows
+- Identifier changes require manual updates in multiple locations
+- Stale or inconsistent references accumulate over time
+- There is no authoritative map of system dependencies
+  
+Hardcoded identifiers increase coupling and reduce operational clarity.
 
 ## Pattern
 
-The Registry-as-SSOT pattern centralizes all environment-specific identifiers in a dedicated registry layer. Workflows never contain hard values for data store references — they contain only logical keys. At runtime, each workflow resolves its logical keys against the registry before executing.
+The Registry-as-SSOT pattern centralizes all environment-specific identifiers in a dedicated configuration layer. Workflows reference logical keys rather than concrete values. At runtime, each workflow resolves logical keys against the registry before execution.
 
 ```
 Workflow Node
@@ -24,35 +26,35 @@ Registry Lookup
     ▼
 Data Store Operation
 ```
-
+This enforces indirection between workflow logic and environment configuration.
 ## Registry Structure
 
-The registry is split by concern:
+The registry is partitioned by responsibility:
 
 | Registry | Holds |
 |---|---|
-| Data Store Registry | Spreadsheet IDs, database names, Drive folder IDs |
+| Data Store Registry | Spreadsheet IDs, database names, storage locations |
 | Workflow Registry | Workflow names, IDs, version metadata |
-| Routing Registry | Shortcode patterns, intent-to-agent mappings |
-| Error Type Registry | Error patterns and associated fix strategies |
+| Routing Registry | Intent mappings and deterministic patterns |
+| Error Type Registry | Error classifications and remediation mappings |
 | Cache Registry | TTL class definitions and key format rules |
-| Credential Registry | Logical credential names (no secrets — just names) |
+| Credential Registry | Logical credential names only |
 
-Secrets are never stored in the registry. The registry holds logical names that map to credentials configured separately in the workflow engine.
+Secrets are never stored in the registry. The registry maps logical identifiers to credentials managed externally by the workflow engine.
 
 ## Benefits
 
-**Single update point** — Changing a spreadsheet ID means updating one registry entry. All workflows that reference that logical key automatically resolve the new value.
+**Single update point** — Updating a spreadsheet ID requires modifying one registry entry. All dependent workflows automatically resolve the new value.
 
-**Auditable** — The registry is a complete map of what the system connects to. A new team member can read the registry to understand all external dependencies without reading individual workflows.
+**Auditable configuration** — The registry provides a complete map of external dependencies without requiring inspection of workflow implementations.
 
-**Portable** — Moving from one environment to another (staging → production) requires only a registry swap, not editing individual workflow nodes.
+**Environment Portable** — Transitioning between environments requires replacing the registry configuration rather than editing workflow nodes.
 
-**Validated** — Registry entries can be validated against known schemas. Malformed entries fail validation before deployment, not at runtime.
+**Pre-deployment validation** — Registry entries are validated against declared schemas. Invalid configuration fails validation before deployment.
 
 ## Implementation Notes
 
 - The registry is file-based and version-controlled alongside workflows
-- A startup validation script verifies registry integrity on session open
-- Workflows are blocked from deployment if they reference unregistered keys
-- The registry is not a database — it is a structured configuration artifact, not runtime state
+- A validation script verifies registry integrity during session initialization
+- Deployment is blocked if workflows reference undefined keys
+- The registry is configuration, not runtime state
