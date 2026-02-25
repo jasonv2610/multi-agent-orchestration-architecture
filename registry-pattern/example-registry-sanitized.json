@@ -51,11 +51,11 @@
   },
 
   "cache_ttl_classes": {
-    "no_cache": { "ttl_seconds": 0, "use_case": "Real-time data" },
-    "short":    { "ttl_seconds": 300, "use_case": "High-frequency status" },
-    "medium":   { "ttl_seconds": 3600, "use_case": "General queries" },
-    "long":     { "ttl_seconds": 86400, "use_case": "Research and analysis" },
-    "reference":{ "ttl_seconds": 604800, "use_case": "Stable definitions" }
+    "no_cache":  { "ttl_seconds": 0,      "use_case": "Real-time data" },
+    "short":     { "ttl_seconds": 300,    "use_case": "High-frequency status" },
+    "medium":    { "ttl_seconds": 3600,   "use_case": "General queries" },
+    "long":      { "ttl_seconds": 86400,  "use_case": "Research and analysis" },
+    "reference": { "ttl_seconds": 604800, "use_case": "Stable definitions" }
   },
 
   "cache_key_format": "system:{agent_id}:{user_context_hash}:{query_hash}"

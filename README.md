@@ -1,4 +1,4 @@
-# JVI Assistant — Multi-Agent Orchestration System
+# Multi-Agent Orchestration Architecture
 
 A multi-agent personal automation system built on n8n Cloud. Routes incoming requests across six specialized domains — productivity, finance, operations, research, growth, and document processing — through a central intent classification layer.
 
