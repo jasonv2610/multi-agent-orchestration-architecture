@@ -1,0 +1,78 @@
+{
+  "_description": "Sanitized structural example of a domain agent workflow. Node parameters, IDs, credentials, and business logic are redacted.",
+  "name": "[Domain] Agent — Redacted Example",
+  "version": "2.x",
+
+  "nodes": [
+    {
+      "id": "<REDACTED>",
+      "type": "trigger",
+      "role": "Entry point — receives classified intent payload from orchestrator",
+      "parameters": "<REDACTED>"
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "registry-lookup",
+      "role": "Resolves logical data store keys to environment-specific identifiers via registry",
+      "parameters": {
+        "key": "[logical_store_name]",
+        "registry": "<REDACTED>"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "cache-check",
+      "role": "Checks response cache before executing agent logic. Returns cached result if valid TTL hit.",
+      "parameters": {
+        "ttl_class": "[short|medium|long|reference]",
+        "key_template": "<REDACTED>"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "ai-reasoning",
+      "role": "Applies domain-specific LLM reasoning to classify, extract, or generate structured output",
+      "parameters": {
+        "model": "<REDACTED>",
+        "prompt_template": "<REDACTED>",
+        "output_schema": "<REDACTED>"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "data-read",
+      "role": "Reads current state from the domain data store (resolved via registry)",
+      "parameters": "<REDACTED>"
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "business-logic",
+      "role": "Applies domain-specific transformation, validation, or decision logic",
+      "parameters": "<REDACTED>"
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "data-write",
+      "role": "Writes structured output to the domain data store with timestamp and metadata",
+      "parameters": "<REDACTED>"
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "cache-write",
+      "role": "Stores response in cache with TTL class key",
+      "parameters": "<REDACTED>"
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "response-formatter",
+      "role": "Formats agent response into the standard output contract shape for return to orchestrator",
+      "parameters": {
+        "output_fields": ["response_text", "confidence", "data_written", "cache_hit"]
+      }
+    }
+  ],
+
+  "connections": "<REDACTED — node execution order preserved in structure above>",
+
+  "contract_ref": "examples/redacted-agent-contract.yaml"
+}
