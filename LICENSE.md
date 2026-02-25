@@ -1,6 +1,6 @@
 # License
 
-Copyright (c) 2026 Jason V.
+Copyright (c) 2026 Jason Vo
 
 All rights reserved.
 
