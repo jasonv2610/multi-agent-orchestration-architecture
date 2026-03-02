@@ -6,23 +6,25 @@ This document covers the tools used in this project and how to configure them fo
 
 ## Tools Used
 
+These are the external services and credentials used directly by the 6 scheduling assistant workflow files in this repository.
+
 ### Runtime
 
-| Tool | Role | Version |
-|------|------|---------|
-| [n8n](https://n8n.io) | Workflow automation runtime — executes all pipeline stages | v1.0+ |
-| [Google Calendar API](https://developers.google.com/calendar) | Calendar read (conflict scan) and write (event creation) | v3 |
-| [Microsoft Outlook API](https://learn.microsoft.com/en-us/graph/api/resources/calendar) | Outlook Calendar event creation (optional alternative to Google) | MS Graph v1.0 |
-| SMTP | Email notification delivery in stage 06 | Any provider |
-| PostgreSQL | Optional persistent logging in stage 06 (disabled by default) | v13+ |
+| Tool | Used In | Role | Credential Type |
+|------|---------|------|-----------------|
+| [n8n](https://n8n.io) | All stages | Workflow automation runtime — executes all pipeline stages | — |
+| [Google Calendar API](https://developers.google.com/calendar/api/guides/overview) | Stage 04, 05 | Stage 04: reads existing events to detect conflicts. Stage 05: creates new calendar events and sends invitations. | Google Calendar OAuth2 |
+| [Microsoft Outlook API](https://learn.microsoft.com/en-us/graph/api/resources/calendar) | Stage 05 | Alternative calendar — creates Outlook events when attendee domain is Microsoft. Optional; Google Calendar is the default. | Microsoft Outlook OAuth2 |
+| SMTP | Stage 06 | Sends email notifications (confirmation, conflict alert, validation failure) to requestor. | SMTP |
+| PostgreSQL | Stage 06 | Persists scheduling logs to a database table. **Disabled by default** — enable the node in stage 06 only if you need persistent logs. | Postgres |
 
 ### Developer Interface
 
-| Tool | Role |
-|------|------|
-| [Claude Code](https://claude.ai/claude-code) | AI-assisted development via CLI |
-| [n8n MCP Server](https://github.com/leonardsellem/n8n-mcp-server) | MCP integration for Claude Code → n8n workflow management |
-| Git | Version control for all workflow and architecture files |
+| Tool | Role | Where to Get |
+|------|------|--------------|
+| [Claude Code](https://claude.ai/claude-code) | AI-assisted development via CLI | [claude.ai/claude-code](https://claude.ai/claude-code) |
+| [n8n MCP Server](https://github.com/leonardsellem/n8n-mcp-server) | Connects Claude Code to n8n for workflow inspection and management | [github.com/leonardsellem/n8n-mcp-server](https://github.com/leonardsellem/n8n-mcp-server) |
+| Git | Version control for all workflow, contract, and governance files | [git-scm.com](https://git-scm.com) |
 
 ---
 
@@ -60,32 +62,116 @@ n8n start
 
 All credentials are referenced by logical name in the workflow JSON. The actual secrets are stored in n8n's credential vault and never appear in workflow logic.
 
-### Google Calendar OAuth2
+The credential names below must match **exactly** — the workflow files reference them by these names.
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a project and enable the **Google Calendar API**
-3. Create OAuth 2.0 credentials (Web Application type)
-4. Add authorized redirect URI: `https://<your-n8n-domain>/rest/oauth2-credential/callback`
-5. In n8n: **Settings → Credentials → Add Credential → Google Calendar OAuth2 API**
-   - Name it exactly: `Google Calendar OAuth2`
-   - Enter Client ID and Client Secret
-   - Click Connect and authorize
+---
 
-### Microsoft Outlook OAuth2 (Optional)
+### 1. Google Calendar OAuth2
 
-1. Go to [Azure Portal](https://portal.azure.com) → App Registrations → New Registration
-2. Set redirect URI: `https://<your-n8n-domain>/rest/oauth2-credential/callback`
-3. Under API Permissions, add: `Calendars.ReadWrite`, `offline_access`
-4. In n8n: **Settings → Credentials → Add Credential → Microsoft Outlook OAuth2 API**
-   - Name it exactly: `Microsoft Outlook OAuth2`
-   - Enter Application (Client) ID and Client Secret
+**Used in:** Stage 04 (conflict scan — read), Stage 05 (event creation — write)
 
-### SMTP
+**How to obtain:**
 
-1. Obtain SMTP credentials from your email provider (Gmail, SendGrid, Postmark, etc.)
-2. In n8n: **Settings → Credentials → Add Credential → SMTP**
-   - Name it exactly: `SMTP Credentials`
-   - Enter host, port, username, and password
+1. Go to [Google Cloud Console](https://console.cloud.google.com) and create or select a project
+2. Navigate to **APIs & Services → Library** and enable the **Google Calendar API**
+3. Navigate to **APIs & Services → Credentials → Create Credentials → OAuth 2.0 Client ID**
+   - Application type: **Web application**
+   - Add authorized redirect URI: `https://<your-n8n-domain>/rest/oauth2-credential/callback`
+4. Copy the **Client ID** and **Client Secret**
+
+**In n8n:**
+- **Settings → Credentials → Add Credential → Google Calendar OAuth2 API**
+- Name: `Google Calendar OAuth2` (exact match required)
+- Paste Client ID and Client Secret
+- Click **Connect** — a Google authorization window opens; sign in and grant calendar access
+
+---
+
+### 2. Microsoft Outlook OAuth2 (Optional)
+
+**Used in:** Stage 05 only — routed when attendee domain is `outlook.com`, `office365.com`, or `microsoft.com`. Skip this credential if you only use Google Calendar.
+
+**How to obtain:**
+
+1. Go to [Azure Portal](https://portal.azure.com) → **Azure Active Directory → App Registrations → New Registration**
+   - Name: any descriptive name
+   - Supported account types: **Accounts in any organizational directory and personal Microsoft accounts**
+   - Redirect URI: `https://<your-n8n-domain>/rest/oauth2-credential/callback`
+2. After registration, note the **Application (Client) ID**
+3. Go to **Certificates & Secrets → New Client Secret** — copy the secret value
+4. Go to **API Permissions → Add a permission → Microsoft Graph → Delegated**
+   - Add: `Calendars.ReadWrite`, `offline_access`, `User.Read`
+5. Click **Grant admin consent**
+
+**In n8n:**
+- **Settings → Credentials → Add Credential → Microsoft Outlook OAuth2 API**
+- Name: `Microsoft Outlook OAuth2` (exact match required)
+- Paste Application (Client) ID and Client Secret
+- Click **Connect** and authorize with a Microsoft account
+
+---
+
+### 3. SMTP
+
+**Used in:** Stage 06 (email notifications — confirmation, conflict alert, validation failure)
+
+**How to obtain:**
+
+Choose any SMTP provider. Common options:
+
+| Provider | SMTP Host | Port | Notes |
+|----------|-----------|------|-------|
+| Gmail | `smtp.gmail.com` | 587 | Requires an [App Password](https://myaccount.google.com/apppasswords) — not your Gmail password |
+| SendGrid | `smtp.sendgrid.net` | 587 | Use `apikey` as username; API key as password |
+| Postmark | `smtp.postmarkapp.com` | 587 | Use API token as both username and password |
+| Mailgun | `smtp.mailgun.org` | 587 | Use SMTP credentials from Mailgun domain settings |
+
+**In n8n:**
+- **Settings → Credentials → Add Credential → SMTP**
+- Name: `SMTP Credentials` (exact match required)
+- Enter: Host, Port, Username, Password
+- TLS: enabled (recommended)
+
+**Also set this environment variable:**
+```bash
+NOTIFICATION_EMAIL_FROM=noreply@yourdomain.com
+```
+
+---
+
+### 4. PostgreSQL (Optional — Disabled by Default)
+
+**Used in:** Stage 06 — the `Store in Database` node is present but **disabled**. Enable it only if you want persistent scheduling logs.
+
+**How to obtain:**
+
+Provide connection details for any PostgreSQL-compatible database:
+
+| Option | How to Get Connection Details |
+|--------|-------------------------------|
+| Self-hosted PostgreSQL | Server hostname, port (5432), database name, username, password |
+| Supabase | Project → Settings → Database → Connection string (use Transaction Pooler) |
+| Railway / Render / Neon | Connection details from your dashboard |
+
+**Create the log table first:**
+
+```sql
+CREATE TABLE scheduling_logs (
+  request_id       TEXT,
+  status           TEXT,
+  notification_type TEXT,
+  completed_at     TIMESTAMPTZ,
+  processing_time_ms BIGINT
+);
+```
+
+**In n8n:**
+- **Settings → Credentials → Add Credential → Postgres**
+- Name: `Postgres Credentials` (or update the node to match your credential name)
+- Enter: Host, Port, Database, Username, Password
+- SSL Mode: `require` (recommended for hosted databases)
+
+**To enable:** Open `06_notify.json` in n8n, find the `Store in Database (Optional)` node, and toggle it on.
 
 ---
 
