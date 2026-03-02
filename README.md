@@ -43,10 +43,17 @@ Agents operate independently against dedicated data stores and are bound by expl
 
 ## Repository Structure
 
-The system is organized into five logical layers. This public showcase includes the first three; the final two are private.
+The system is organized into five logical layers. This public showcase includes architecture, governance, registry, and integration patterns. Internal operational documentation is private.
 
-**Workflows**
-The automation layer. Contains the master orchestrator, six domain agents, a scheduling sub-pipeline, error handler, and helper utilities. Workflows are version-controlled and validated against declared contracts before deployment. No workflow is ever deleted from production -deprecated logic is deactivated or superseded.
+**Architecture**
+Design documentation for each system component. Covers the orchestration pattern, domain agent model, scheduling sub-pipeline, error recovery model, integration layer, and observability design.
+
+- `architecture/overview.md` — Orchestrator, domain agents, caching layer, key design decisions
+- `architecture/scheduling-pipeline.md` — 6-stage scheduling sub-pipeline, event payload schema, stage reference
+- `architecture/error-handler.md` — Error type catalog, known fix patterns, AI-assisted repair, escalation model
+- `architecture/integrations.md` — AI/reasoning, data storage, communication, and developer tooling integrations
+- `architecture/observability.md` — Signal taxonomy, alert thresholds, dashboard structure
+- `architecture/diagrams/agent-topology.md` — Primary flow, error path, and scheduling pipeline topology
 
 **Governance**
 The contract and policy layer. Declares input/output schemas for each agent, routing policy, caching policy, verification thresholds, and versioning rules. A pre-commit validation gate enforces contract compliance before any workflow change reaches the repository.
@@ -54,8 +61,12 @@ The contract and policy layer. Declares input/output schemas for each agent, rou
 **Registry**
 The configuration SSOT layer. Centralizes all data store references, credential identifiers, routing rules, and cache class definitions. Workflows resolve identifiers at runtime from the registry; no environment-specific values are hard-coded into the workflow logic.
 
-**Integrations** *(conceptual -credentials and endpoints are private)*
-The external service layer. Organized into four categories: AI and reasoning services, data storage backends, communication interfaces, and developer tooling. All integration credentials are managed outside the repository.
+**Examples**
+Sanitized structural examples illustrating how the architecture is implemented at the workflow level. All IDs, credentials, business logic, and prompt templates are redacted.
+
+- `examples/redacted-orchestrator-workflow.json` — Master orchestrator routing structure with annotated node roles
+- `examples/redacted-agent-contract.yaml` — Domain agent input/output contract structure
+- `examples/redacted-workflow.json` — Domain agent workflow node structure
 
 **Documentation** *(private)*
 Internal knowledge base, prompt templates, n8n execution standards, debugging patterns, and operational runbooks. Not included in this public showcase.

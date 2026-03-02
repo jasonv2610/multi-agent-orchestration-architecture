@@ -72,3 +72,5 @@
 ```
 
 Each stage is a discrete, independently deployable unit connected by a shared event payload schema.
+
+See `architecture/scheduling-pipeline.md` for full stage reference, event payload schema, and design decisions.
