@@ -2,22 +2,24 @@
 
 Copyright (c) 2026 Jason Vo
 
-All rights reserved.
+This work is licensed under the [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License](https://creativecommons.org/licenses/by-nc-nd/4.0/).
 
-This repository contains architectural documentation and sanitized examples published for portfolio and reference purposes.
+---
 
-## Permitted Use
+## You are free to:
 
-- Viewing and referencing the architectural patterns described in this repository
-- Implementing similar design patterns in independent, original systems
-- Linking to or citing this repository in professional contexts
+**Share** — copy and redistribute the material in any medium or format.
 
-## Restrictions
+## Under the following terms:
 
-- Reproducing or redistributing repository content without permission
-- Modifying and republishing repository materials
-- Representing repository content as your own original work
+**Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
 
-The architectural concepts described here, including registry-driven configuration, orchestrator-agent topology, and contract-first governance, are general system design principles. The operational implementations, infrastructure, and internal documentation from which this showcase is derived remain private and are not included.
+**NonCommercial** — You may not use the material for commercial purposes.
 
-For permissions or inquiries, contact the repository owner via GitHub.
+**NoDerivatives** — If you remix, transform, or build upon the material, you may not distribute the modified material.
+
+---
+
+The architectural concepts described in this repository — including registry-driven configuration, orchestrator-agent topology, and contract-first governance — are general system design principles. The operational implementations, infrastructure, and internal documentation from which this showcase is derived remain private and are not included in this repository.
+
+For permissions beyond the scope of this license, contact the repository owner via GitHub.
