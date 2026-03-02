@@ -116,7 +116,8 @@ Published materials reflect architectural and structural decisions only. Functio
 
 ## Getting Started
 
-See [SETUP.md](SETUP.md) for tool requirements, credential configuration, workflow import order, environment variables, and verification steps.
+- [SETUP.md](SETUP.md) — Tool requirements, credential configuration, workflow import order, environment variables, and verification steps.
+- [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) — How to apply these architecture patterns to build your own system: reading order, architecture decisions, component build sequence, scheduling assistant adaptation guide, and pre-launch checklist.
 
 ## License
 
