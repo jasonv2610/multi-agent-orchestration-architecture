@@ -1,16 +1,16 @@
 # Error Handler
 
-The error handler is a dedicated recovery agent that intercepts workflow execution failures and applies structured remediation without blocking the primary execution path. It operates asynchronously — a failure in one workflow does not delay responses to concurrent requests.
+The error handler is a dedicated recovery agent that intercepts workflow execution failures and applies structured remediation without blocking the primary execution path. It operates asynchronously: a failure in one workflow does not delay responses to concurrent requests.
 
 ---
 
 ## Design Principles
 
-**Async and non-blocking.** The error handler runs on a separate execution path. When a workflow failure is routed to it, the originating request receives an immediate failure response to the user while recovery executes independently. This prevents a single degraded integration from cascading into visible latency for unrelated requests.
+**Async and non-blocking.** The error handler runs on a separate execution path. When a workflow failure is routed to it, the originating request receives an immediate failure response to the user while recovery runs independently. This prevents a single degraded integration from cascading into visible latency for unrelated requests.
 
-**Recover before escalating.** The handler exhausts all automated recovery options before surfacing a failure for human review. Human escalation is treated as a signal that the fix catalog needs expansion — not a routine outcome.
+**Recover before escalating.** The handler exhausts all automated recovery options before surfacing a failure for human review. Human escalation is treated as a signal that the fix catalog needs expansion, not a routine outcome.
 
-**Validate before re-executing.** No fix is applied directly. Every proposed fix — whether from the pattern catalog or AI-assisted repair — is validated against the declared agent contract before re-execution. This prevents a malformed repair from producing a second failure.
+**Validate before re-executing.** No fix is applied directly. Every proposed fix, whether from the pattern catalog or AI-assisted repair, is validated against the declared agent contract before re-execution. This prevents a malformed repair from producing a second failure.
 
 **Fix catalog over generalism.** Known error types are resolved by deterministic fix patterns, not by re-running LLM classification each time. The AI-assisted repair path exists only for errors with no catalog match. This keeps recovery fast and cost-efficient for common failure modes.
 
@@ -23,10 +23,10 @@ The error type registry is the authoritative catalog of classified failure patte
 ### Error Type Schema
 
 ```yaml
-error_type: "string — unique identifier"
+error_type: "string: unique identifier"
 error_class: "transient | permanent | recoverable"
 affected_component: "orchestrator | agent | data_store | integration | contract"
-description: "string — human-readable description of the condition"
+description: "string: human-readable description of the condition"
 known_fix_pattern: "pattern_id or null"
 retry_eligible: true | false
 max_retries: integer
@@ -41,7 +41,7 @@ escalation_policy: "log_and_notify | immediate_escalation | silent_log"
 | **Permanent** | Not retry eligible. Condition will not change on retry. | Malformed input payload, invalid registry key reference, contract schema violation |
 | **Recoverable** | Requires a fix before retry. Condition can be resolved with a targeted correction. | Stale registry reference, deprecated workflow node type, auth credential rotation needed |
 
-### Example Catalog Entries (Structural — Values Redacted)
+### Example Catalog Entries (Structural, Values Redacted)
 
 ```yaml
 - error_type: "data_store.timeout"
@@ -85,7 +85,7 @@ escalation_policy: "log_and_notify | immediate_escalation | silent_log"
 
 ## Recovery Paths
 
-### Path A — Known Fix Pattern
+### Path A: Known Fix Pattern
 
 Applies when the classified error type has a `known_fix_pattern` entry in the catalog.
 
@@ -104,7 +104,7 @@ Known fix pattern found?
 Retrieve fix pattern from catalog
       │
       ▼
-Apply fix (deterministic — no LLM call)
+Apply fix (deterministic, no LLM call)
       │
       ▼
 Validate fix against agent contract
@@ -128,7 +128,7 @@ Validate fix against agent contract
 
 ---
 
-### Path B — AI-Assisted Repair
+### Path B: AI-Assisted Repair
 
 Applies when no known fix pattern matches the classified error type, or when the error type is unclassified.
 
@@ -182,7 +182,7 @@ The context sent to the repair model is scoped to what is strictly necessary. Th
   "error_message": "sanitized error description",
   "failed_node_type": "workflow node type identifier",
   "failed_node_version": "semver string",
-  "input_payload_schema": "structure only — no values",
+  "input_payload_schema": "structure only, no values",
   "contract_ref": "agent contract schema for the failing component",
   "last_successful_execution": "ISO 8601 timestamp"
 }
@@ -202,9 +202,9 @@ constraints:
   max_retries: 2
 ```
 
-The error handler respects the contract's `max_retries` value. It does not override agent-level limits with a system-level default. This allows agents with higher failure tolerance (e.g., async logging) to configure more retries than agents where strict execution order matters (e.g., scheduling writes).
+The error handler respects the contract's `max_retries` value. It does not override agent-level limits with a system-level default. This lets agents with higher failure tolerance (e.g., async logging) configure more retries than agents where strict execution order matters (e.g., scheduling writes).
 
-**Retry state tracking:** Each retry attempt decrements the remaining retry count in the execution context. The handler does not restart the counter on a new fix attempt — retries are consumed across both Path A and Path B attempts within a single failure event.
+**Retry state tracking:** Each retry attempt decrements the remaining retry count in the execution context. The handler does not restart the counter on a new fix attempt. Retries are consumed across both Path A and Path B attempts within a single failure event.
 
 ---
 
@@ -229,11 +229,11 @@ When all recovery options are exhausted, the error handler produces a structured
   ],
   "retries_consumed": "integer",
   "escalation_policy": "log_and_notify | immediate_escalation | silent_log",
-  "recommended_action": "string — generated by repair model or catalog"
+  "recommended_action": "string, generated by repair model or catalog"
 }
 ```
 
-Escalations are written to the error log data store and — depending on escalation policy — trigger a notification. `immediate_escalation` errors produce an alert synchronously. `log_and_notify` errors are batched into a review queue.
+Escalations are written to the error log data store and, depending on escalation policy, trigger a notification. `immediate_escalation` errors produce an alert synchronously. `log_and_notify` errors are batched into a review queue.
 
 ---
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Pre-commit Contract Validator — Structural Example
+ * Pre-commit Contract Validator:Structural Example
  *
  * All schema paths, validation library references, and business logic are
  * represented as placeholders. This file illustrates the validation structure
@@ -12,8 +12,8 @@
  * Exits 0 (commit allowed) or 1 (commit blocked)
  *
  * Runs two checks on every modified workflow file:
- *   1. Version bump — modified workflows must carry a version increment
- *   2. Contract compliance — output node structure must conform to declared contract schema
+ *   1. Version bump:modified workflows must carry a version increment
+ *   2. Contract compliance:output node structure must conform to declared contract schema
  */
 
 // const Ajv = require('ajv');              // npm: ajv
@@ -30,7 +30,7 @@ const PATHS = {
 };
 
 // ─────────────────────────────────────────────
-// Step 1 — Identify modified workflow files
+// Step 1:Identify modified workflow files
 // ─────────────────────────────────────────────
 
 /**
@@ -40,11 +40,11 @@ const PATHS = {
 function getStagedWorkflowFiles() {
   // REDACTED: exec('git diff --cached --name-only --diff-filter=M')
   // REDACTED: filter for files matching PATHS.workflows pattern
-  // Returns: string[] — relative paths of modified workflow files
+  // Returns: string[]:relative paths of modified workflow files
 }
 
 // ─────────────────────────────────────────────
-// Step 2 — Version bump check
+// Step 2:Version bump check
 // ─────────────────────────────────────────────
 
 /**
@@ -67,7 +67,7 @@ function checkVersionBumps(stagedFiles) {
     // REDACTED: read committed version from HEAD
     //   const headVersion = JSON.parse(execSync(`git show HEAD:${file}`)).versionId;
 
-    // REDACTED: compare semver — staged must be strictly greater than HEAD
+    // REDACTED: compare semver:staged must be strictly greater than HEAD
     //   if (!semverGt(stagedVersion, headVersion)) {
     //     violations.push(`${file}: versionId not incremented (${headVersion} → ${stagedVersion})`);
     //   }
@@ -77,7 +77,7 @@ function checkVersionBumps(stagedFiles) {
 }
 
 // ─────────────────────────────────────────────
-// Step 3 — Contract compliance check
+// Step 3:Contract compliance check
 // ─────────────────────────────────────────────
 
 /**
@@ -110,7 +110,7 @@ function checkContractCompliance(stagedFiles) {
     // REDACTED: validate node output_fields against schema.output.guaranteed
     //   const result = ajv.validate(schema.output, formatterNode.parameters.output_fields);
     //   if (!result) {
-    //     violations.push(`${file}: contract violation — ${ajv.errorsText()}`);
+    //     violations.push(`${file}: contract violation:${ajv.errorsText()}`);
     //   }
   }
 
@@ -125,7 +125,7 @@ function main() {
   const staged = getStagedWorkflowFiles();
 
   if (!staged || staged.length === 0) {
-    // No workflow files in this commit — nothing to validate
+    // No workflow files in this commit:nothing to validate
     process.exit(0);
   }
 
@@ -135,7 +135,7 @@ function main() {
   const allViolations = [...versionViolations, ...contractViolations];
 
   if (allViolations.length > 0) {
-    console.error('\n[pre-commit] BLOCKED — resolve the following before committing:\n');
+    console.error('\n[pre-commit] BLOCKED:resolve the following before committing:\n');
     allViolations.forEach(v => console.error(`  ✗  ${v}`));
     console.error('\n');
     process.exit(1);

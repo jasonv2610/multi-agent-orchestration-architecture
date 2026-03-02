@@ -2,9 +2,9 @@
 
 ## Pattern: Orchestrator + Domain Agents + Error Handler
 
-The system follows a hub-and-spoke orchestration pattern. A single central orchestrator handles all input reception, intent classification, and routing. Domain agents are stateless execution units that receive a classified intent payload, perform domain-specific work, and return a structured response.
+The system follows a hub-and-spoke orchestration pattern. A single central orchestrator handles all input reception, intent classification, and routing. Domain agents are stateless execution units that receive a classified intent payload, do domain-specific work, and return a structured response.
 
-This pattern isolates domain logic behind clear input/output contracts, allowing each agent to evolve independently without coupling to other agents or the orchestrator's internal routing logic.
+This pattern isolates domain logic behind clear input/output contracts, so each agent can evolve independently without coupling to other agents or the orchestrator's internal routing logic.
 
 ---
 
@@ -78,13 +78,13 @@ Cache keys are scoped by agent, user context, and a hash of the query parameters
 
 ## Key Design Decisions
 
-- **No direct agent-to-agent calls** — prevents hidden coupling and makes routing auditable
-- **Shortcode bypass** — deterministic routing for known high-frequency commands avoids unnecessary LLM calls
-- **Registry-resolved configuration** — no data store IDs, API endpoints, or routing rules are hardcoded in workflow logic (see `registry-pattern/`)
-- **Spec-defined contracts** — each agent's input/output shape is declared in a schema; violations are caught at validation time, not runtime
+- **No direct agent-to-agent calls:** This prevents hidden coupling and makes routing auditable.
+- **Shortcode bypass:** Deterministic routing for known high-frequency commands avoids unnecessary LLM calls.
+- **Registry-resolved configuration:** No data store IDs, API endpoints, or routing rules are hardcoded in workflow logic (see `registry-pattern/`).
+- **Spec-defined contracts:** Each agent's input/output shape is declared in a schema. Violations are caught at validation time, not runtime.
 
 ---
 
 ## Working Example
 
-A complete, importable implementation of this architecture is available in `examples/scheduling-assistant/`. It demonstrates the scheduling sub-pipeline — a 6-stage linear workflow that applies the same orchestration principles (registry-resolved config, spec-defined payload schema, stage-gated execution) to calendar coordination. See `architecture/scheduling-pipeline.md` for the full design documentation.
+A complete, importable implementation of this architecture is available in `examples/scheduling-assistant/`. It demonstrates the scheduling sub-pipeline: a 6-stage linear workflow that applies the same orchestration principles (registry-resolved config, spec-defined payload schema, stage-gated execution) to calendar coordination. See `architecture/scheduling-pipeline.md` for the full design documentation.

@@ -2,13 +2,13 @@
 
 A contract-first, registry-driven multi-agent orchestration architecture deployed on n8n Cloud. The system routes structured and unstructured inputs across specialized domain agents using deterministic routing and confidence-governed intent classification.
 
-Built for engineers designing production multi-agent systems who want architectural patterns beyond single-workflow tutorials — registry-based configuration, formal agent contracts, and autonomous error recovery.
+Built for engineers designing production multi-agent systems who want architectural patterns beyond single-workflow tutorials: registry-based configuration, formal agent contracts, and autonomous error recovery.
 
 The production system this showcase is derived from runs on n8n Cloud and handles live operational workflows across multiple domain agents.
 
 ## Architecture Overview
 
-A central orchestrator receives input from multiple channels, text, voice, and image, classifies intent using a routing layer, and delegates execution to an appropriate domain agent.
+A central orchestrator receives input from multiple channels, text, voice, and image, classifies intent using a routing layer, and delegates to an appropriate domain agent.
 
 Agents operate independently against dedicated data stores and are bound by explicit input and output contracts. Execution failures are intercepted by a recovery layer that applies remediation patterns without direct human intervention.
 
@@ -52,38 +52,38 @@ The system is organized into five logical layers. This public showcase includes 
 **Architecture**
 Design documentation for each system component. Covers the orchestration pattern, domain agent model, scheduling sub-pipeline, error recovery model, integration layer, and observability design.
 
-- `architecture/overview.md` — Orchestrator, domain agents, caching layer, key design decisions
-- `architecture/scheduling-pipeline.md` — 6-stage scheduling sub-pipeline, event payload schema, stage reference
-- `architecture/error-handler.md` — Error type catalog, known fix patterns, AI-assisted repair, escalation model
-- `architecture/integrations.md` — AI/reasoning, data storage, communication, and developer tooling integrations
-- `architecture/observability.md` — Signal taxonomy, alert thresholds, dashboard structure
-- `architecture/diagrams/agent-topology.md` — Primary flow, error path, and scheduling pipeline topology
+- `architecture/overview.md`: Orchestrator, domain agents, caching layer, key design decisions
+- `architecture/scheduling-pipeline.md`: 6-stage scheduling sub-pipeline, event payload schema, stage reference
+- `architecture/error-handler.md`: Error type catalog, known fix patterns, AI-assisted repair, escalation model
+- `architecture/integrations.md`: AI/reasoning, data storage, communication, and developer tooling integrations
+- `architecture/observability.md`: Signal taxonomy, alert thresholds, dashboard structure
+- `architecture/diagrams/agent-topology.md`: Primary flow, error path, and scheduling pipeline topology
 
 **Governance**
-The contract and policy layer. Declares input/output schemas for each agent, routing policy, caching policy, verification thresholds, and versioning rules. A pre-commit validation gate enforces contract compliance before any workflow change reaches the repository.
+The contract and policy layer. Declares input/output schemas for each agent, routing policy, caching policy, verification thresholds, and versioning rules. A pre-commit validation gate checks contract compliance before any workflow change reaches the repository.
 
 **Registry**
-The configuration SSOT layer. Centralizes all data store references, credential identifiers, routing rules, and cache class definitions. Workflows resolve identifiers at runtime from the registry; no environment-specific values are hard-coded into the workflow logic.
+The configuration SSOT layer. Centralizes all data store references, credential identifiers, routing rules, and cache class definitions. Workflows resolve identifiers at runtime from the registry. No environment-specific values are hard-coded into workflow logic.
 
 **Examples**
 Workflow examples ranging from redacted structural illustrations to a complete, importable pipeline implementation.
 
-- `examples/scheduling-assistant/` — Full 6-stage scheduling pipeline: actual n8n workflow exports, event payload schema, and manifest. Importable into any n8n instance.
-- `examples/redacted-orchestrator-workflow.json` — Master orchestrator routing structure with annotated node roles
-- `examples/redacted-error-handler.json` — Error handler node sequence: Path A catalog recovery, Path B AI-assisted repair, escalation
-- `examples/redacted-agent-contract.yaml` — Domain agent input/output contract structure
-- `examples/redacted-workflow.json` — Domain agent workflow node structure
+- `examples/scheduling-assistant/`: Full 6-stage scheduling pipeline: actual n8n workflow exports, event payload schema, and manifest. Importable into any n8n instance.
+- `examples/redacted-orchestrator-workflow.json`: Master orchestrator routing structure with annotated node roles
+- `examples/redacted-error-handler.json`: Error handler node sequence: Path A catalog recovery, Path B AI-assisted repair, escalation
+- `examples/redacted-agent-contract.yaml`: Domain agent input/output contract structure
+- `examples/redacted-workflow.json`: Domain agent workflow node structure
 
 **Documentation** *(private)*
 Internal knowledge base, prompt templates, n8n execution standards, debugging patterns, and operational runbooks. Not included in this public showcase.
 
 ## Execution Example
 
-**Input:** Voice message -"86 the salmon" (mark menu item as unavailable)
+**Input:** Voice message: "86 the salmon" (mark menu item as unavailable)
 
 1. Messaging interface receives the voice attachment and passes it to the orchestrator
 2. Orchestrator routes audio through a speech-to-text transcription node
-3. Transcript matches a deterministic shortcode pattern; LLM classification is bypassed
+3. Transcript matches a deterministic shortcode pattern, so LLM classification is bypassed
 4. Operations Agent is invoked with the extracted item identifier
 5. Agent updates the inventory data store with availability status and timestamp
 6. Confirmation is synthesized to audio and returned as a voice reply
@@ -112,15 +112,15 @@ Published materials reflect architectural and structural decisions only. Functio
 
 ## Design Principles
 
-- **Configuration over hardcoding** — Environment-specific values reside in a centralized registry, never inside workflow logic.
-- **Contracts over assumptions** — Every agent declares explicit input/output schemas enforced at commit time.
-- **Validation before delegation** — Low-confidence intent triggers clarification rather than speculative routing.
-- **Abstraction over coupling** — Agents share no direct dependencies; coordination flows through the orchestrator.
+- **Configuration over hardcoding:** Environment-specific values reside in a centralized registry, never inside workflow logic.
+- **Contracts over assumptions:** Every agent declares explicit input/output schemas enforced at commit time.
+- **Validation before delegation:** Low-confidence intent triggers clarification rather than speculative routing.
+- **Abstraction over coupling:** Agents share no direct dependencies. Coordination flows through the orchestrator.
 
 ## Getting Started
 
-- [SETUP.md](SETUP.md) — Tool requirements, credential configuration, workflow import order, environment variables, and verification steps.
-- [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) — How to apply these architecture patterns to build your own system: reading order, architecture decisions, component build sequence, scheduling assistant adaptation guide, and pre-launch checklist.
+- [SETUP.md](SETUP.md): Tool requirements, credential configuration, workflow import order, environment variables, and verification steps.
+- [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md): How to apply these architecture patterns to build your own system: reading order, architecture decisions, component build sequence, scheduling assistant adaptation guide, and pre-launch checklist.
 
 ## License
 

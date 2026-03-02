@@ -1,13 +1,13 @@
 {
   "_description": "Sanitized structural example of a domain agent workflow. Node parameters, IDs, credentials, and business logic are redacted.",
-  "name": "[Domain] Agent — Redacted Example",
+  "name": "[Domain] Agent:Redacted Example",
   "version": "2.x",
 
   "nodes": [
     {
       "id": "<REDACTED>",
       "type": "trigger",
-      "role": "Entry point — receives classified intent payload from orchestrator",
+      "role": "Entry point:receives classified intent payload from orchestrator",
       "parameters": "<REDACTED>"
     },
     {
@@ -72,7 +72,7 @@
     }
   ],
 
-  "connections": "<REDACTED — node execution order preserved in structure above>",
+  "connections": "<REDACTED:node execution order preserved in structure above>",
 
   "contract_ref": "examples/redacted-agent-contract.yaml"
 }

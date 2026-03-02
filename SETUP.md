@@ -12,11 +12,11 @@ These are the external services and credentials used directly by the 6 schedulin
 
 | Tool | Used In | Role | Credential Type |
 |------|---------|------|-----------------|
-| [n8n](https://n8n.io) | All stages | Workflow automation runtime — executes all pipeline stages | — |
+| [n8n](https://n8n.io) | All stages | Workflow automation runtime: runs all pipeline stages | None |
 | [Google Calendar API](https://developers.google.com/calendar/api/guides/overview) | Stage 04, 05 | Stage 04: reads existing events to detect conflicts. Stage 05: creates new calendar events and sends invitations. | Google Calendar OAuth2 |
-| [Microsoft Outlook API](https://learn.microsoft.com/en-us/graph/api/resources/calendar) | Stage 05 | Alternative calendar — creates Outlook events when attendee domain is Microsoft. Optional; Google Calendar is the default. | Microsoft Outlook OAuth2 |
-| Notification channel | Stage 06 | Dispatches confirmation, conflict alert, or failure message to the requestor. **Configurable** — the delivery node is disabled by default. Replace it with Telegram, a webhook, or any messaging integration your system uses. | Depends on channel |
-| PostgreSQL | Stage 06 | Persists scheduling logs to a database table. **Disabled by default** — enable the node in stage 06 only if you need persistent logs. | Postgres |
+| [Microsoft Outlook API](https://learn.microsoft.com/en-us/graph/api/resources/calendar) | Stage 05 | Alternative calendar: creates Outlook events when attendee domain is Microsoft. Optional; Google Calendar is the default. | Microsoft Outlook OAuth2 |
+| Notification channel | Stage 06 | Dispatches confirmation, conflict alert, or failure message to the requestor. **Configurable:** the delivery node is disabled by default. Replace it with Telegram, a webhook, or any messaging integration your system uses. | Depends on channel |
+| PostgreSQL | Stage 06 | Persists scheduling logs to a database table. **Disabled by default.** Enable the node in stage 06 only if you need persistent logs. | Postgres |
 
 ### Developer Interface
 
@@ -30,12 +30,12 @@ These are the external services and credentials used directly by the 6 schedulin
 
 ## n8n Installation
 
-### Option A — n8n Cloud (Recommended)
+### Option A: n8n Cloud (Recommended)
 
 1. Create an account at [n8n.io](https://n8n.io)
-2. No local installation required — workflows import directly via the UI
+2. No local installation required. Workflows import directly via the UI.
 
-### Option B — Self-Hosted via Docker
+### Option B: Self-Hosted via Docker
 
 ```bash
 docker volume create n8n_data
@@ -49,7 +49,7 @@ docker run -it --rm \
 
 Access the editor at `http://localhost:5678`.
 
-### Option C — Self-Hosted via npm
+### Option C: Self-Hosted via npm
 
 ```bash
 npm install n8n -g
@@ -62,13 +62,13 @@ n8n start
 
 All credentials are referenced by logical name in the workflow JSON. The actual secrets are stored in n8n's credential vault and never appear in workflow logic.
 
-The credential names below must match **exactly** — the workflow files reference them by these names.
+The credential names below must match **exactly**. The workflow files reference them by these names.
 
 ---
 
 ### 1. Google Calendar OAuth2
 
-**Used in:** Stage 04 (conflict scan — read), Stage 05 (event creation — write)
+**Used in:** Stage 04 (conflict scan, read-only), Stage 05 (event creation, write)
 
 **How to obtain:**
 
@@ -83,13 +83,13 @@ The credential names below must match **exactly** — the workflow files referen
 - **Settings → Credentials → Add Credential → Google Calendar OAuth2 API**
 - Name: `Google Calendar OAuth2` (exact match required)
 - Paste Client ID and Client Secret
-- Click **Connect** — a Google authorization window opens; sign in and grant calendar access
+- Click **Connect**. A Google authorization window opens. Sign in and grant calendar access.
 
 ---
 
 ### 2. Microsoft Outlook OAuth2 (Optional)
 
-**Used in:** Stage 05 only — routed when attendee domain is `outlook.com`, `office365.com`, or `microsoft.com`. Skip this credential if you only use Google Calendar.
+**Used in:** Stage 05 only. This credential is used when the attendee domain is `outlook.com`, `office365.com`, or `microsoft.com`. Skip it if you only use Google Calendar.
 
 **How to obtain:**
 
@@ -98,7 +98,7 @@ The credential names below must match **exactly** — the workflow files referen
    - Supported account types: **Accounts in any organizational directory and personal Microsoft accounts**
    - Redirect URI: `https://<your-n8n-domain>/rest/oauth2-credential/callback`
 2. After registration, note the **Application (Client) ID**
-3. Go to **Certificates & Secrets → New Client Secret** — copy the secret value
+3. Go to **Certificates & Secrets → New Client Secret**. Copy the secret value.
 4. Go to **API Permissions → Add a permission → Microsoft Graph → Delegated**
    - Add: `Calendars.ReadWrite`, `offline_access`, `User.Read`
 5. Click **Grant admin consent**
@@ -111,15 +111,15 @@ The credential names below must match **exactly** — the workflow files referen
 
 ---
 
-### 3. Notification Channel (Stage 06 — Configure for Your System)
+### 3. Notification Channel (Stage 06: Configure for Your System)
 
-**Used in:** Stage 06 — the `Send Notification` node is **disabled by default**. You must replace it with your actual delivery mechanism before the pipeline can send notifications.
+**Used in:** Stage 06. The `Send Notification` node is **disabled by default**. Replace it with your actual delivery channel before the pipeline can send notifications.
 
 **The notification payload is already prepared** by the `Prepare Notification` node above it. It contains:
-- `$json.notification.subject` — message subject / title
-- `$json.notification.body` — full message body
-- `$json.notification.recipients` — array of recipient addresses or IDs
-- `$json.notification.type` — `event_created`, `conflict_detected`, or `validation_failed`
+- `$json.notification.subject`: message subject or title
+- `$json.notification.body`: full message body
+- `$json.notification.recipients`: array of recipient addresses or IDs
+- `$json.notification.type`: `event_created`, `conflict_detected`, or `validation_failed`
 
 **Common replacements:**
 
@@ -137,9 +137,9 @@ The credential names below must match **exactly** — the workflow files referen
 
 ---
 
-### 4. PostgreSQL (Optional — Disabled by Default)
+### 4. PostgreSQL (Optional, Disabled by Default)
 
-**Used in:** Stage 06 — the `Store in Database` node is present but **disabled**. Enable it only if you want persistent scheduling logs.
+**Used in:** Stage 06. The `Store in Database` node is present but **disabled**. Enable it only if you want persistent scheduling logs.
 
 **How to obtain:**
 
@@ -194,7 +194,7 @@ CREATE TABLE scheduling_logs (
 Set these in n8n: **Settings → Variables** (n8n Cloud) or via `.env` file (self-hosted).
 
 ```bash
-# Workflow IDs — replace with the actual IDs assigned after import
+# Workflow IDs: replace with the actual IDs assigned after import
 WORKFLOW_ID_EXTRACT_NORMALIZE=<id of 02_extract_normalize>
 WORKFLOW_ID_VALIDATE=<id of 03_validate>
 WORKFLOW_ID_CONFLICT_SCAN=<id of 04_conflict_scan>
@@ -273,11 +273,11 @@ npm install
 
 | Package | Version | Role |
 |---------|---------|------|
-| `ajv` | ^8.17 | JSON Schema validation — used by pre-commit validator and contract tests |
+| `ajv` | ^8.17 | JSON Schema validation for the pre-commit validator and contract tests |
 | `ajv-formats` | ^3.0 | Format extensions for AJV (date-time, email, uri) |
-| `semver` | ^7.6 | Semantic version comparison — pre-commit version bump check |
+| `semver` | ^7.6 | Semantic version comparison for the pre-commit version bump check |
 | `jest` | ^29.7 | Test runner |
-| `husky` | ^9.1 | Git hook manager — installs pre-commit hook automatically |
+| `husky` | ^9.1 | Git hook manager. Installs the pre-commit hook automatically on `npm install`. |
 
 ### Run tests
 
@@ -301,7 +301,7 @@ Runs the pre-commit contract validator against all staged workflow files. Same c
 Requires Node.js 20+. If you use nvm:
 
 ```bash
-nvm use   # reads .nvmrc — switches to Node 20
+nvm use   # reads .nvmrc and switches to Node 20
 ```
 
 ---

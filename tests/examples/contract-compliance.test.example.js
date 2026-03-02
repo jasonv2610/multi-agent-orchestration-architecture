@@ -1,5 +1,5 @@
 /**
- * Contract Compliance Test — Structural Example
+ * Contract Compliance Test:Structural Example
  *
  * All schema paths, fixture values, and agent-specific field names are
  * replaced with placeholders. This file illustrates the test structure only.
@@ -52,7 +52,7 @@ function getDeclaredOutputFields(formatterNode) {
 // Tests
 // ─────────────────────────────────────────────
 
-describe('[Domain] Agent — Contract Compliance', () => {
+describe('[Domain] Agent:Contract Compliance', () => {
 
   it('workflow file loads without parse errors', () => {
     // REDACTED: assert workflow is a non-null object with a nodes array
@@ -114,7 +114,7 @@ describe('[Domain] Agent — Contract Compliance', () => {
 // Payload schema test (scheduling pipeline)
 // ─────────────────────────────────────────────
 
-describe('Scheduling Pipeline — Payload Schema Compliance', () => {
+describe('Scheduling Pipeline:Payload Schema Compliance', () => {
 
   it('stage output fixture validates against event_payload.schema.json', () => {
     // REDACTED:

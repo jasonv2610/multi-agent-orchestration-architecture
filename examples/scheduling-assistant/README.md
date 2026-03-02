@@ -1,6 +1,6 @@
 # Scheduling Assistant
 
-An intelligent scheduling workflow system that processes scheduling requests, validates availability, detects conflicts, and manages calendar integrations.
+A scheduling workflow system that processes scheduling requests, validates availability, detects conflicts, and manages calendar integrations.
 
 ## Purpose
 
@@ -66,16 +66,16 @@ scheduling-assistant/
 - n8n instance (v1.0+)
 - Calendar API credentials (Google Calendar, Outlook, or both)
 - SMTP credentials for email notifications
-- PostgreSQL database (optional — for persistent logging)
+- PostgreSQL database (optional, for persistent logging)
 
 ### Installation
 
-1. **Import Workflows** — Use the n8n UI: Settings → Import from File. Import all 6 workflows in order.
+1. **Import Workflows**: Use the n8n UI: Settings → Import from File. Import all 6 workflows in order.
 
 2. **Configure Credentials** in n8n:
-   - `Google Calendar OAuth2` — for Google Calendar read/write
-   - `Microsoft Outlook OAuth2` — for Outlook Calendar (optional)
-   - `SMTP Credentials` — for email notification delivery
+   - `Google Calendar OAuth2`: for Google Calendar read/write
+   - `Microsoft Outlook OAuth2`: for Outlook Calendar (optional)
+   - `SMTP Credentials`: for email notification delivery
 
 3. **Set Environment Variables**:
    ```bash
@@ -94,7 +94,7 @@ scheduling-assistant/
    NOTIFICATION_EMAIL_FROM=noreply@yourcompany.com
    ```
 
-4. **Activate Workflows** — Start with `01_intake.json`, then activate remaining stages.
+4. **Activate Workflows**: Start with `01_intake.json`, then activate the remaining stages.
 
 ### Testing
 
@@ -147,17 +147,17 @@ See `specs/event_payload.schema.json` for the full JSON Schema definition.
 
 ## Design Decisions
 
-**Workflow IDs via environment variables** — Stage-to-stage triggers use `$env.WORKFLOW_ID_*` references. No workflow contains hardcoded IDs for other workflows.
+**Workflow IDs via environment variables**: Stage-to-stage triggers use `$env.WORKFLOW_ID_*` references. No workflow contains hardcoded IDs for other workflows.
 
-**Credential references by name** — All calendar and SMTP credentials are referenced by logical name, resolved by the n8n engine at runtime. No secrets are embedded in workflow logic.
+**Credential references by name**: All calendar and SMTP credentials are referenced by logical name and resolved by the n8n engine at runtime. No secrets are embedded in workflow logic.
 
-**Validation before calendar access** — Stages 01–03 perform no calendar reads or writes. Calendar operations begin only at stage 04, after business logic validation passes.
+**Validation before calendar access**: Stages 01-03 perform no calendar reads or writes. Calendar operations begin only at stage 04, after business logic validation passes.
 
-**Conflict resolution produces alternatives** — Stage 04 does not hard-block on conflicts. It generates up to 3 alternative time suggestions (earlier same day, later same day, same time next day) and routes to notification so the requestor can choose.
+**Conflict resolution produces alternatives**: Stage 04 does not hard-block on conflicts. It generates up to 3 alternative time suggestions (earlier same day, later same day, same time next day) and routes to notification so the requestor can choose.
 
-**Notification decoupled from write** — Stage 06 is independent from stage 05. A notification failure does not roll back the calendar event.
+**Notification decoupled from write**: Stage 06 is independent from stage 05. A notification failure does not roll back the calendar event.
 
-**Optional database logging** — The Postgres node in stage 06 is disabled by default. Enable it if persistent scheduling logs are required.
+**Optional database logging**: The Postgres node in stage 06 is disabled by default. Enable it if you need persistent scheduling logs.
 
 ## Troubleshooting
 

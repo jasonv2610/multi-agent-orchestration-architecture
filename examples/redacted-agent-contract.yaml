@@ -1,11 +1,11 @@
-# Redacted Agent Contract — Structural Example
+# Redacted Agent Contract,Structural Example
 # All domain-specific values, field names, and business logic are replaced with placeholders.
 
 agent: "[Domain] Agent"
 version: "2.x"
-domain: "[bounded context — e.g., productivity | finance | operations]"
+domain: "[bounded context,e.g., productivity | finance | operations]"
 
-# INPUT 
+# INPUT
 
 input:
   required:
@@ -30,7 +30,7 @@ input:
     - name: cache_hint
       type: string
       enum: [no_cache, short, medium, long, reference]
-      description: Override for TTL class selection. Defaults to policy-defined class for this agent.
+      description: Override for TTL class selection. Defaults to the policy-defined class for this agent.
 
     - name: user_context_hash
       type: string
@@ -82,14 +82,14 @@ output:
       type: boolean
       description: Whether the orchestrator should attempt retry
 
-# CONSTRAINTS 
+# CONSTRAINTS
 
 constraints:
   max_execution_ms: "[policy-defined]"
   default_ttl_class: "[policy-defined per domain]"
   retry_on_partial_failure: true
   max_retries: 2
-  requires_data_store_write: "[true | false — domain-specific]"
+  requires_data_store_write: "[true | false,domain-specific]"
 
 # VERSIONING
 

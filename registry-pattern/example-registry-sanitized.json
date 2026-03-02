@@ -61,7 +61,7 @@
   "cache_key_format": "system:{agent_id}:{user_context_hash}:{query_hash}",
 
   "routing_registry": {
-    "_note": "Maps agent identifiers to workflow references. Workflow IDs are read from environment variables — no IDs are hardcoded here.",
+    "_note": "Maps agent identifiers to workflow references. Workflow IDs are read from environment variables:no IDs are hardcoded here.",
     "productivity": {
       "agent_id": "productivity",
       "workflow_id_ref": "$env.WORKFLOW_ID_PRODUCTIVITY",
@@ -107,7 +107,7 @@
     "VALIDATION_FAILURE": {
       "retry_eligible": false,
       "route_to": "error_handler",
-      "user_message_template": "Your request could not be processed — see errors below."
+      "user_message_template": "Your request could not be processed:see errors below."
     },
     "AGENT_TIMEOUT": {
       "retry_eligible": true,

@@ -33,9 +33,9 @@ Every agent contract declares:
 
 Contracts are enforced at two points:
 
-**At commit time** — A validation script checks all workflow JSON files against their declared contracts. Commits that produce contract violations are blocked.
+**At commit time**:A validation script checks all workflow JSON files against their declared contracts. Commits that produce contract violations are blocked.
 
-**At runtime** — The orchestrator validates the dispatch payload before invoking an agent. Invalid payloads are rejected with a structured error rather than passed to the agent.
+**At runtime**:The orchestrator validates the dispatch payload before invoking an agent. Invalid payloads are rejected with a structured error rather than passed to the agent.
 
 See `examples/redacted-agent-contract.yaml` for the canonical contract structure, and `examples/scheduling-assistant/specs/event_payload.schema.json` for a concrete schema implementation used in the scheduling pipeline.
 

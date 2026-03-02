@@ -1,6 +1,6 @@
 # Observability
 
-Observability in a multi-agent orchestration system requires instrumentation at each architectural layer. A single metric point (e.g., end-to-end latency) is insufficient to distinguish between a slow LLM call, a cache miss, an agent data store bottleneck, and a notification delivery delay. Each layer must be independently observable.
+Observability in a multi-agent orchestration system requires instrumentation at each architectural layer. A single metric point (e.g., end-to-end latency) is not enough to distinguish between a slow LLM call, a cache miss, an agent data store bottleneck, and a notification delivery delay. Each layer must be independently observable.
 
 This document defines the signal taxonomy, alert thresholds, and dashboard structure for the system.
 
@@ -16,8 +16,8 @@ The routing layer is the highest-leverage observation point. Problems here affec
 |--------|------|-------------------|
 | Intent classification confidence distribution | Histogram | Proportion of inputs resolved with high vs. low confidence. A shift toward lower confidence indicates input pattern drift or model degradation. |
 | Shortcode hit rate | Rate | Percentage of inputs resolved deterministically. A drop here increases LLM calls and latency. |
-| LLM classification call rate | Rate | Volume of inputs requiring AI classification. Rising rate with flat shortcode hit rate indicates new input patterns not yet mapped to shortcodes. |
-| Clarification request rate | Rate | Percentage of inputs that triggered a clarification rather than a routing decision. Sustained high rate indicates routing policy needs tuning. |
+| LLM classification call rate | Rate | Volume of inputs requiring AI classification. A rising rate with a flat shortcode hit rate indicates new input patterns not yet mapped to shortcodes. |
+| Clarification request rate | Rate | Percentage of inputs that triggered a clarification rather than a routing decision. A sustained high rate indicates routing policy needs tuning. |
 | Routing latency (p50 / p95 / p99) | Latency | End-to-end time from input receipt to agent dispatch. Separates orchestrator overhead from agent execution time. |
 | Unknown intent rate | Rate | Inputs that matched no shortcode and produced no classifiable intent. These should trend toward zero over time as routing coverage expands. |
 
@@ -30,11 +30,11 @@ Each domain agent is independently observable. Aggregate metrics mask domain-spe
 | Signal | Type | Dimensions |
 |--------|------|------------|
 | Agent execution latency | Latency (p50/p95/p99) | Per agent domain |
-| Execution status distribution | Rate | success / partial / failed — per agent domain |
-| Data store write rate | Rate | Per agent domain — distinguishes read-heavy from write-heavy agents |
-| Cache hit rate | Rate | Per agent domain — see Cache Layer for full detail |
-| LLM calls per agent execution | Count | Per agent domain — agents with high LLM call counts per execution have higher cost and latency variance |
-| Follow-up suggested rate | Rate | Per agent domain — indicates how often agents return open-ended rather than terminal responses |
+| Execution status distribution | Rate | success / partial / failed, per agent domain |
+| Data store write rate | Rate | Per agent domain. Distinguishes read-heavy from write-heavy agents. |
+| Cache hit rate | Rate | Per agent domain. See Cache Layer for full detail. |
+| LLM calls per agent execution | Count | Per agent domain. Agents with high LLM call counts per execution have higher cost and latency variance. |
+| Follow-up suggested rate | Rate | Per agent domain. Indicates how often agents return open-ended rather than terminal responses. |
 
 **Why per-domain:** A failure in the Finance Agent has different severity and remediation than a failure in the Intelligence Agent. Aggregated agent metrics mask the domain context needed for diagnosis.
 
@@ -49,7 +49,7 @@ Cache behavior directly affects perceived response latency and LLM call volume. 
 | Cache hit rate by TTL class | Rate | Whether TTL assignments match actual data volatility. A high miss rate on a "long" TTL class indicates data is changing faster than the policy assumes. |
 | Cache miss rate by agent | Rate | Per-agent misses reveal which domains generate the most uncached LLM calls. |
 | Cache key collision rate | Rate | Unexpected collisions indicate key format issues in the scoping logic. |
-| Cache eviction rate | Rate | High eviction rate against a constrained cache budget indicates TTL or capacity tuning is needed. |
+| Cache eviction rate | Rate | A high eviction rate against a constrained cache budget indicates TTL or capacity tuning is needed. |
 | Stale-read frequency | Rate | Reads that hit cache but return data whose underlying source has since changed. Indicates TTL classes set too long for specific domains. |
 
 ---
@@ -61,11 +61,11 @@ The error handler's effectiveness is measured by how much work it absorbs withou
 | Signal | Type | What It Tells You |
 |--------|------|-------------------|
 | Error rate by type | Rate | Distribution across the error type registry. Concentration in one type indicates a systemic issue. |
-| Known-pattern match rate | Rate | Percentage of errors resolved via the fix pattern catalog vs. requiring AI-assisted repair. Declining rate indicates new error patterns emerging. |
-| AI-assisted repair success rate | Rate | Percentage of AI-repair attempts that produce a valid fix. Low rate indicates the repair model needs additional context or the error type is fundamentally non-recoverable. |
+| Known-pattern match rate | Rate | Percentage of errors resolved via the fix pattern catalog vs. requiring AI-assisted repair. A declining rate indicates new error patterns emerging. |
+| AI-assisted repair success rate | Rate | Percentage of AI-repair attempts that produce a valid fix. A low rate indicates the repair model needs additional context or the error type is fundamentally non-recoverable. |
 | Retry consumption rate | Rate | How often errors exhaust max_retries. Consistently hitting max_retries before resolution signals a need to expand the fix catalog. |
 | Human escalation rate | Rate | Errors that exhaust all recovery options. This metric should trend toward zero as the fix catalog grows. |
-| Mean time to recovery (MTTR) | Duration | Per error type — separates fast-recovering transient errors from slow-recovering structural ones. |
+| Mean time to recovery (MTTR) | Duration | Per error type. Separates fast-recovering transient errors from slow-recovering structural ones. |
 
 ---
 
@@ -76,8 +76,8 @@ Top-level signals for operational monitoring.
 | Signal | Type | What It Tells You |
 |--------|------|-------------------|
 | End-to-end latency (p50 / p95 / p99) | Latency | Full cycle from input receipt to response delivery. Baseline for detecting systemic slowdowns. |
-| Workflow execution queue depth | Gauge | Buildup indicates throughput constraint — either in the orchestrator, an agent, or an external integration. |
-| Pipeline stage latency — scheduling sub-pipeline | Latency per stage | Isolates which scheduling stage is the bottleneck when scheduling requests are slow. |
+| Workflow execution queue depth | Gauge | Buildup indicates a throughput constraint in the orchestrator, an agent, or an external integration. |
+| Scheduling sub-pipeline stage latency | Latency per stage | Isolates which scheduling stage is the bottleneck when scheduling requests are slow. |
 | Active workflow count | Gauge | Concurrent executions. Useful for capacity planning and detecting runaway loops. |
 | Version validation failures at commit | Count | Pre-commit gate rejections. Persistent failures indicate contract drift or team process issues. |
 
@@ -101,9 +101,9 @@ Thresholds are policy-configured and adjusted based on observed baselines. The v
 
 ## Dashboard Structure
 
-Four dashboards cover the full observability surface. Each is independent — an operator can load the routing dashboard without the agent dashboard loading unnecessary data.
+Four dashboards cover the full observability surface. Each is independent: an operator can load the routing dashboard without the agent dashboard loading unnecessary data.
 
-### Dashboard 1 — System Health Overview
+### Dashboard 1: System Health Overview
 
 Single-pane summary for operational awareness:
 - End-to-end latency trends (p50 / p95 / p99)
@@ -112,7 +112,7 @@ Single-pane summary for operational awareness:
 - Shortcode hit rate vs. LLM call rate ratio
 - Top 3 slowest agents (current rolling window)
 
-### Dashboard 2 — Routing Layer
+### Dashboard 2: Routing Layer
 
 Deep routing observability:
 - Confidence distribution histogram (live and 7-day trend)
@@ -121,7 +121,7 @@ Deep routing observability:
 - Routing latency breakdown (shortcode path vs. LLM path)
 - Most frequent unresolved intent patterns
 
-### Dashboard 3 — Agent Performance
+### Dashboard 3: Agent Performance
 
 Per-domain agent health:
 - Execution status distribution per agent (success / partial / failed)
@@ -130,7 +130,7 @@ Per-domain agent health:
 - LLM calls per execution per agent
 - Data write rate per agent
 
-### Dashboard 4 — Error Recovery
+### Dashboard 4: Error Recovery
 
 Error handler effectiveness:
 - Error rate by type (stacked bar, rolling window)
@@ -148,11 +148,11 @@ Each architectural component has a defined set of events to emit:
 
 | Component | Events to Instrument |
 |-----------|---------------------|
-| Orchestrator — routing layer | Input received, shortcode match result, LLM call dispatched, confidence score, agent dispatched, clarification triggered |
+| Orchestrator, routing layer | Input received, shortcode match result, LLM call dispatched, confidence score, agent dispatched, clarification triggered |
 | Each domain agent | Execution started, cache check result, LLM call (if applicable), data store read/write, execution status, response returned |
 | Cache layer | Cache hit, cache miss, cache write, eviction |
 | Error handler | Error captured, error type classified, fix pattern matched (or not), repair attempted, repair result, retry count, escalation |
 | Scheduling sub-pipeline | Stage entered, stage completed, stage failed, conflict found, export written, notification dispatched |
 | Pre-commit validation gate | Validation run, violations found (with type), commit blocked |
 
-All events include: `timestamp`, `workflow_id`, `agent_domain` (where applicable), `execution_id` for correlation across a single request lifecycle.
+All events include: `timestamp`, `workflow_id`, `agent_domain` (where applicable), and `execution_id` for correlation across a single request lifecycle.

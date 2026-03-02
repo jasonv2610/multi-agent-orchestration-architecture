@@ -15,7 +15,7 @@ This is not a repeat of [SETUP.md](SETUP.md). SETUP.md covers running the schedu
 
 ---
 
-## Step 1 — Read the Architecture Docs in Order
+## Step 1:Read the Architecture Docs in Order
 
 Before building anything, read these documents in this sequence. Each one builds on the previous.
 
@@ -23,22 +23,22 @@ Before building anything, read these documents in this sequence. Each one builds
 |-------|----------|--------------------------|
 | 1 | `README.md` | Overall system model, design principles, what is and is not included |
 | 2 | `architecture/overview.md` | Orchestrator responsibilities, agent model, caching layer, key decisions |
-| 3 | `architecture/diagrams/agent-topology.md` | Visual flow — primary path, error path, scheduling sub-pipeline |
+| 3 | `architecture/diagrams/agent-topology.md` | Visual flow: primary path, error path, scheduling sub-pipeline |
 | 4 | `governance/contracts-overview.md` | How agent contracts work and why they exist |
 | 5 | `governance/policy-summary.md` | Routing, caching, verification, and versioning policies |
 | 6 | `registry-pattern/ssot-pattern.md` | Why configuration is centralized and how the registry works |
 | 7 | `examples/redacted-agent-contract.yaml` | Concrete contract structure before you write your own |
 | 8 | `examples/redacted-orchestrator-workflow.json` | Orchestrator node anatomy with role annotations |
 | 9 | `examples/redacted-workflow.json` | Domain agent workflow structure |
-| 10 | `architecture/error-handler.md` | Recovery model — understand before you build any agent |
+| 10 | `architecture/error-handler.md` | Recovery model:understand before you build any agent |
 | 11 | `architecture/integrations.md` | What external services connect and how credentials are managed |
-| 12 | `architecture/observability.md` | What to instrument — plan this before you build, not after |
+| 12 | `architecture/observability.md` | What to instrument:plan this before you build, not after |
 
-The scheduling assistant (in `examples/scheduling-assistant/`) is a full working reference. Return to it once you have completed the above — it will be significantly more useful after you understand the architecture it implements.
+The scheduling assistant (in `examples/scheduling-assistant/`) is a full working reference. Return to it once you have completed the above:it will be significantly more useful after you understand the architecture it implements.
 
 ---
 
-## Step 2 — Make Your Architecture Decisions
+## Step 2:Make Your Architecture Decisions
 
 Answer these questions before writing any workflow. Decisions made here determine the structure of every component you build.
 
@@ -95,7 +95,7 @@ These logical names go in your registry. The actual credentials go in n8n's cred
 
 ---
 
-## Step 3 — Build in This Order
+## Step 3:Build in This Order
 
 Build in this sequence. Each layer depends on the previous. Building out of order produces incomplete components you will have to revise.
 
@@ -104,7 +104,7 @@ Build in this sequence. Each layer depends on the previous. Building out of orde
       ↓
 2. Agent Contracts
       ↓
-3. Orchestrator (routing layer only — no agents yet)
+3. Orchestrator (routing layer only:no agents yet)
       ↓
 4. Domain Agents (one at a time)
       ↓
@@ -119,18 +119,18 @@ Build in this sequence. Each layer depends on the previous. Building out of orde
 
 ### 3.1 Registry First
 
-Build your registry before any workflow. The registry is the configuration SSOT — workflows resolve identifiers from it at runtime. Building workflows before the registry results in hardcoded IDs that are difficult to migrate later.
+Build your registry before any workflow. The registry is the configuration SSOT. Workflows resolve identifiers from it at runtime. Building workflows before the registry results in hardcoded IDs that are difficult to migrate later.
 
 **What goes in the registry:**
 - All data store logical names and their resolved IDs (spreadsheet IDs, database names, folder IDs)
-- All workflow logical names and IDs (filled in after import — see step 3.3)
-- All credential logical names (not the credentials themselves — logical names only)
+- All workflow logical names and IDs (filled in after import:see step 3.3)
+- All credential logical names (not the credentials themselves:logical names only)
 - All cache TTL class definitions
 - All routing rules and shortcode patterns
 
 Use `registry-pattern/example-registry-sanitized.json` as your structural template. Replace all `<REDACTED>` placeholders with your actual logical names. Leave IDs as placeholders until you have imported workflows and have real n8n IDs.
 
-**Commit your registry to version control.** It is configuration, not secrets — treat it like code.
+**Commit your registry to version control.** It is configuration, not secrets:treat it like code.
 
 ---
 
@@ -183,18 +183,18 @@ Build the orchestrator workflow using `examples/redacted-orchestrator-workflow.j
 
 Build in this node order, testing each path before adding the next:
 
-1. **Multi-channel trigger** — Configure for your input channels
-2. **Input normalizer** — Handle each input type (text passthrough, voice → STT)
-3. **Shortcode matcher** — Load patterns from routing registry; return matched/not-matched
-4. **Routing branch** — If matched: skip to registry lookup. If not: go to LLM classifier
-5. **LLM intent classifier** — Configure model, prompt template, and output schema
-6. **Confidence gate** — Check confidence against threshold from routing policy
-7. **Clarification responder** — Return user-facing clarification when confidence is low
-8. **Registry lookup** — Resolve target agent from routing registry
-9. **Dispatch payload builder** — Assemble payload, validate against agent contract
-10. **Agent dispatcher** — Execute agent workflow; route failures to error router
-11. **Response handler** — Format for delivery channel
-12. **Error router** — Capture failure context, trigger error handler async
+1. **Multi-channel trigger**:Configure for your input channels
+2. **Input normalizer**:Handle each input type (text passthrough, voice → STT)
+3. **Shortcode matcher**:Load patterns from routing registry; return matched/not-matched
+4. **Routing branch**:If matched: skip to registry lookup. If not: go to LLM classifier
+5. **LLM intent classifier**:Configure model, prompt template, and output schema
+6. **Confidence gate**:Check confidence against threshold from routing policy
+7. **Clarification responder**:Return user-facing clarification when confidence is low
+8. **Registry lookup**:Resolve target agent from routing registry
+9. **Dispatch payload builder**:Assemble payload, validate against agent contract
+10. **Agent dispatcher**:Run agent workflow; route failures to error router
+11. **Response handler**:Format for delivery channel
+12. **Error router**:Capture failure context, trigger error handler async
 
 **At this stage, agent workflows do not exist yet.** Test the orchestrator routing paths using mock responses before building agents. This confirms routing logic is correct before domain logic adds complexity.
 
@@ -229,7 +229,7 @@ cached       ↓
 ```
 
 **Each agent must:**
-- Reference data stores by logical name via the registry — never hardcode IDs
+- Reference data stores by logical name via the registry:never hardcode IDs
 - Return the exact output fields declared in its contract
 - Return a structured error shape (not a raw exception) on failure
 - Respect its declared `max_retries` value
@@ -244,14 +244,14 @@ Build the error handler after at least one agent is working. You need real failu
 
 Structure the error handler as two paths (see `architecture/error-handler.md` for full detail):
 
-**Path A — Known fix pattern:**
+**Path A:Known fix pattern:**
 1. Classify error type against error type registry
 2. If known pattern found: retrieve fix, apply, validate against contract, re-execute
-3. If validation passes: re-execute. If fails: escalate.
+3. If validation passes: re-execute. If it fails: escalate.
 
-**Path B — AI-assisted repair:**
+**Path B:AI-assisted repair:**
 1. If no pattern found: capture structured failure context
-2. Submit context to repair model (sanitized — no raw values, schema only)
+2. Submit context to repair model (sanitized:no raw values, schema only)
 3. Validate proposed fix against contract
 4. If valid: apply and re-execute. Log for catalog promotion.
 5. If invalid after max retries: human escalation record
@@ -264,10 +264,10 @@ Structure the error handler as two paths (see `architecture/error-handler.md` fo
 
 Add instrumentation to each component using `architecture/observability.md` as your signal reference. Instrument in this priority order:
 
-1. **Routing layer** — shortcode hit rate, LLM call rate, classification confidence, routing latency
-2. **Agent layer** — execution status per agent, execution latency per agent, cache hit rate per agent
-3. **Error handler** — error rate by type, Path A vs B split, repair success rate, escalation rate
-4. **System health** — end-to-end latency, queue depth, active workflow count
+1. **Routing layer**:shortcode hit rate, LLM call rate, classification confidence, routing latency
+2. **Agent layer**:execution status per agent, execution latency per agent, cache hit rate per agent
+3. **Error handler**:error rate by type, Path A vs B split, repair success rate, escalation rate
+4. **System health**:end-to-end latency, queue depth, active workflow count
 
 Build your 4 dashboards (System Health, Routing, Agent Performance, Error Recovery) before going live. You cannot diagnose production problems you are not measuring.
 
@@ -277,15 +277,15 @@ Build your 4 dashboards (System Health, Routing, Agent Performance, Error Recove
 
 Once the system is working end-to-end, add the pre-commit validation gates:
 
-- **Version increment gate** — Block commits that modify workflow JSON without a version bump
-- **Registry key gate** — Block commits that introduce workflow references to undefined registry keys
-- **Contract compliance gate** — Block commits that introduce contract violations
+- **Version increment gate**:Block commits that modify workflow JSON without a version bump
+- **Registry key gate**:Block commits that introduce workflow references to undefined registry keys
+- **Contract compliance gate**:Block commits that introduce contract violations
 
 These gates prevent the most common source of production drift: incremental changes that break interfaces silently. See `governance/contracts-overview.md` for the enforcement model.
 
 ---
 
-## Step 4 — Adapting the Scheduling Assistant
+## Step 4:Adapting the Scheduling Assistant
 
 The scheduling assistant in `examples/scheduling-assistant/` is the only fully functional workflow set in this repository. Use it as a concrete reference when building your own pipeline components.
 
@@ -294,10 +294,10 @@ The scheduling assistant in `examples/scheduling-assistant/` is the only fully f
 | Component | How to Adapt |
 |---|---|
 | Pipeline stage structure (01–06 numbered files) | Use the same numbered naming convention for any multi-stage pipeline you build |
-| Set node output pattern (`Set Output Data` node between Code and ExecuteWorkflow) | Copy this pattern exactly — it is how each stage packages its output for the next |
-| `$env.WORKFLOW_ID_*` references | Use env vars for all inter-workflow IDs — never hardcode |
+| Set node output pattern (`Set Output Data` node between Code and ExecuteWorkflow) | Copy this pattern exactly:it is how each stage packages its output for the next |
+| `$env.WORKFLOW_ID_*` references | Use env vars for all inter-workflow IDs:never hardcode |
 | Merge node pattern (stage 04) | Any time a node that may return 0 items feeds into logic that must always execute, add a Merge node before it |
-| Notification stage decoupled from write stage | If you build any pipeline with both a write stage and a notification stage, keep them separate — notification failure should not roll back a completed write |
+| Notification stage decoupled from write stage | If you build any pipeline with both a write stage and a notification stage, keep them separate:notification failure should not roll back a completed write |
 
 **What you replace:**
 
@@ -312,7 +312,7 @@ The scheduling assistant in `examples/scheduling-assistant/` is the only fully f
 
 ---
 
-## Step 5 — Pre-Launch Checklist
+## Step 5:Pre-Launch Checklist
 
 Run through this checklist before going live.
 

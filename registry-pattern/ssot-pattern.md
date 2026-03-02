@@ -2,13 +2,13 @@
 
 ## Problem
 
-In workflow automation systems, environment-specific identifiers such as spreadsheet IDs, database names, folder ID, and API endpoints are often hardcoded directly inside workflow nodes. This introduces structural risk:
+In workflow automation systems, environment-specific identifiers such as spreadsheet IDs, database names, folder IDs, and API endpoints are often hardcoded directly inside workflow nodes. This introduces structural risk:
 
 - Configuration values become duplicated across workflows
 - Identifier changes require manual updates in multiple locations
 - Stale or inconsistent references accumulate over time
 - There is no authoritative map of system dependencies
-  
+
 Hardcoded identifiers increase coupling and reduce operational clarity.
 
 ## Pattern
@@ -46,13 +46,13 @@ Secrets are never stored in the registry. The registry maps logical identifiers 
 
 ## Benefits
 
-**Single update point** — Updating a spreadsheet ID requires modifying one registry entry. All dependent workflows automatically resolve the new value.
+**Single update point**:Updating a spreadsheet ID requires modifying one registry entry. All dependent workflows automatically resolve the new value.
 
-**Auditable configuration** — The registry provides a complete map of external dependencies without requiring inspection of workflow implementations.
+**Auditable configuration**:The registry provides a complete map of external dependencies without requiring inspection of workflow implementations.
 
-**Environment Portable** — Transitioning between environments requires replacing the registry configuration rather than editing workflow nodes.
+**Environment portable**:Transitioning between environments requires replacing the registry configuration rather than editing workflow nodes.
 
-**Pre-deployment validation** — Registry entries are validated against declared schemas. Invalid configuration fails validation before deployment.
+**Pre-deployment validation**:Registry entries are validated against declared schemas. Invalid configuration fails validation before deployment.
 
 ## Implementation Notes
 

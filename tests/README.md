@@ -6,7 +6,7 @@ This directory contains structural examples of the integration tests that enforc
 
 ## Testing Philosophy
 
-Tests in this system have one primary job: **assert that every workflow's outputs conform to its declared agent contract**. This anchors the pre-commit gate — a workflow that passes contract tests can be committed; one that fails is blocked.
+Tests in this system have one primary job: **assert that every workflow's outputs conform to its declared agent contract**. This anchors the pre-commit gate:a workflow that passes contract tests can be committed; one that fails is blocked.
 
 Three test categories cover the full contract surface:
 
@@ -49,9 +49,9 @@ Payload schema tests validate that each pipeline stage's output conforms to the 
 
 Policy compliance tests assert that workflow configuration files respect the declared system policies:
 
-- **Routing policy** — No workflow contains a hardcoded agent endpoint; all routing uses registry lookup
-- **Caching policy** — Cache TTL class references match the declared classes in the registry
-- **Versioning policy** — No workflow's versionId is lower than or equal to its previous committed version
+- **Routing policy**:No workflow contains a hardcoded agent endpoint; all routing uses registry lookup
+- **Caching policy**:Cache TTL class references match the declared classes in the registry
+- **Versioning policy**:No workflow's versionId is lower than or equal to its previous committed version
 
 ---
 
@@ -59,7 +59,7 @@ Policy compliance tests assert that workflow configuration files respect the dec
 
 ```bash
 # REDACTED: test runner command
-# Example structure only — adapt to your test framework
+# Example structure only:adapt to your test framework
 
 npm test                    # run all tests
 npm test -- --contract      # contract compliance only

@@ -8,11 +8,11 @@ This directory contains four reference resources that illustrate the architectur
 
 | Resource | Type | What It Shows |
 |----------|------|---------------|
-| `redacted-orchestrator-workflow.json` | Structural example | Full orchestrator node sequence — multi-channel trigger, shortcode bypass, LLM classifier, confidence gate, registry lookup, dispatch, error routing |
-| `redacted-workflow.json` | Structural example | Single domain agent workflow — registry lookup, cache check, AI reasoning, data read/write, response formatting |
-| `redacted-agent-contract.yaml` | Schema example | Agent input/output contract structure — required fields, output guarantees, error shape, execution constraints, versioning rules |
-| `redacted-error-handler.json` | Structural example | Full error handler node sequence — failure capture, error classification, Path A catalog lookup, Path B AI-assisted repair, contract validation before re-execution, escalation, observability emission |
-| `scheduling-assistant/` | Importable implementation | Complete 6-stage n8n pipeline — intake, extraction, validation, conflict scan, calendar write, notification |
+| `redacted-orchestrator-workflow.json` | Structural example | Full orchestrator node sequence: multi-channel trigger, shortcode bypass, LLM classifier, confidence gate, registry lookup, dispatch, error routing |
+| `redacted-workflow.json` | Structural example | Single domain agent workflow: registry lookup, cache check, AI reasoning, data read/write, response formatting |
+| `redacted-agent-contract.yaml` | Schema example | Agent input/output contract structure: required fields, output guarantees, error shape, execution constraints, versioning rules |
+| `redacted-error-handler.json` | Structural example | Full error handler node sequence: failure capture, error classification, Path A catalog lookup, Path B AI-assisted repair, contract validation before re-execution, escalation, observability emission |
+| `scheduling-assistant/` | Importable implementation | Complete 6-stage n8n pipeline: intake, extraction, validation, conflict scan, calendar write, notification |
 
 ---
 
@@ -43,7 +43,7 @@ See `scheduling-assistant/README.md` for setup instructions and `SETUP.md` (root
 | Shortcode bypass (no LLM for known commands) | `redacted-orchestrator-workflow.json` |
 | Confidence gating | `redacted-orchestrator-workflow.json` |
 | Agent input/output contracts | `redacted-agent-contract.yaml` |
-| Error handler — Path A/B recovery | `redacted-error-handler.json` |
+| Error handler,Path A/B recovery | `redacted-error-handler.json` |
 | Contract validation before re-execution | `redacted-error-handler.json` |
 | AI-assisted repair with catalog promotion | `redacted-error-handler.json` |
 | Stage-gated linear pipeline | `scheduling-assistant/` |
