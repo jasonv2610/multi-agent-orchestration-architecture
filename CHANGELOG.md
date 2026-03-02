@@ -4,6 +4,13 @@ All notable changes to this repository are documented here.
 
 ---
 
+## v2.3.0 (2026-03-02)
+
+### Removed
+- `CLAUDE.md`: Internal AI operating instructions. Not appropriate for a public portfolio repo. Repo conventions and design decisions remain in `README.md` and `IMPLEMENTATION_GUIDE.md`.
+
+---
+
 ## v2.2.0 (2026-01-19)
 
 ### Added
