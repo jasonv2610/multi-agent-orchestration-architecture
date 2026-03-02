@@ -187,4 +187,4 @@ Enable debug logging: `N8N_LOG_LEVEL=debug`
 
 ---
 
-**Version:** 1.0.0 | **Part of:** JVI Multi-Agent Orchestration System
+**Version:** 1.0.0 | **Part of:** Multi-Agent Orchestration Architecture

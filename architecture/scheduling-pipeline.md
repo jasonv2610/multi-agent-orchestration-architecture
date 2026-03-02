@@ -231,3 +231,11 @@ All stages read from and write to a single payload object. Each stage appends it
 **Independent deployability** — Stages share no runtime references to each other. The payload schema is the only coupling point. Any stage can be replaced, scaled, or retried without modifying adjacent stages.
 
 **Notification decoupled from write** — Stage 06 is intentionally separated from stage 05. The event exists in the data store once 05 completes. Notification delivery is a best-effort, independently retriable operation that does not affect the calendar record.
+
+---
+
+## Working Example
+
+An importable n8n implementation of this pipeline is available in `examples/scheduling-assistant/`. The 6 workflow files map directly to the stages described above — each file is a self-contained, independently deployable n8n workflow that applies the same patterns documented here (registry-resolved config, spec-defined payload schema, stage-gated execution).
+
+See `examples/scheduling-assistant/README.md` for setup instructions and `examples/scheduling-assistant/specs/event_payload.schema.json` for the full payload schema.

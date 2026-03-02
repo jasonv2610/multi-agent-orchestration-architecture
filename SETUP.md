@@ -257,6 +257,55 @@ Monitor execution progress in n8n: **Executions** tab for each workflow stage.
 
 ---
 
+## Developer Tooling (Pre-commit Hook + Tests)
+
+The pre-commit contract validator and test suite require Node.js 20+ and npm.
+
+### Install
+
+```bash
+npm install
+```
+
+`npm install` installs all dev dependencies and runs `husky` automatically via the `prepare` script, which wires the pre-commit hook to `.git/hooks/pre-commit`.
+
+### Dependencies installed
+
+| Package | Version | Role |
+|---------|---------|------|
+| `ajv` | ^8.17 | JSON Schema validation — used by pre-commit validator and contract tests |
+| `ajv-formats` | ^3.0 | Format extensions for AJV (date-time, email, uri) |
+| `semver` | ^7.6 | Semantic version comparison — pre-commit version bump check |
+| `jest` | ^29.7 | Test runner |
+| `husky` | ^9.1 | Git hook manager — installs pre-commit hook automatically |
+
+### Run tests
+
+```bash
+npm test                  # all tests
+npm run test:contract     # contract compliance only
+npm run test:schema       # payload schema only
+npm run test:policy       # policy compliance only
+```
+
+### Run the validator manually
+
+```bash
+npm run validate
+```
+
+Runs the pre-commit contract validator against all staged workflow files. Same check that runs automatically on `git commit`.
+
+### Node version
+
+Requires Node.js 20+. If you use nvm:
+
+```bash
+nvm use   # reads .nvmrc — switches to Node 20
+```
+
+---
+
 ## Claude Code + MCP (Developer Interface)
 
 To manage n8n workflows directly from Claude Code:

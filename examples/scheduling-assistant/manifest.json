@@ -1,7 +1,7 @@
 {
     "agent": "scheduling_assistant",
     "role": "Extract scheduling data, validate events, detect conflicts, route to calendars",
-    "version": "v1",
+    "version": "v1.1.0",
     "entrypoint_order": [
         "01_intake.json",
         "02_extract_normalize.json",

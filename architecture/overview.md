@@ -82,3 +82,9 @@ Cache keys are scoped by agent, user context, and a hash of the query parameters
 - **Shortcode bypass** — deterministic routing for known high-frequency commands avoids unnecessary LLM calls
 - **Registry-resolved configuration** — no data store IDs, API endpoints, or routing rules are hardcoded in workflow logic (see `registry-pattern/`)
 - **Spec-defined contracts** — each agent's input/output shape is declared in a schema; violations are caught at validation time, not runtime
+
+---
+
+## Working Example
+
+A complete, importable implementation of this architecture is available in `examples/scheduling-assistant/`. It demonstrates the scheduling sub-pipeline — a 6-stage linear workflow that applies the same orchestration principles (registry-resolved config, spec-defined payload schema, stage-gated execution) to calendar coordination. See `architecture/scheduling-pipeline.md` for the full design documentation.

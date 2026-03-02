@@ -1,0 +1,210 @@
+{
+  "_description": "Sanitized structural example of the error handler workflow. Node parameters, registry references, model identifiers, and fix catalog entries are redacted. Node sequence and role annotations reflect actual architectural structure.",
+  "name": "Error Handler — Redacted Example",
+  "version": "2.x",
+
+  "nodes": [
+    {
+      "id": "<REDACTED>",
+      "type": "failure-capture-trigger",
+      "role": "Entry point. Receives structured failure context from the orchestrator's error-router node. Context includes error type, error message, failed node type, agent domain, input payload schema, and execution ID. Runs asynchronously — does not block the originating request path.",
+      "inputs": {
+        "error_type": "string — classified error type or 'unclassified'",
+        "error_message": "string — sanitized description",
+        "failed_node_type": "string — workflow node type identifier",
+        "agent_domain": "string — domain of the failing agent",
+        "input_payload_schema": "object — structure only, no values",
+        "execution_id": "string"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "error-classifier",
+      "role": "Looks up the received error_type against the error type registry. Returns the error class (transient | permanent | recoverable), retry eligibility, max_retries, and escalation policy. If the error_type is not found in the registry, marks as 'unclassified' and routes to Path B.",
+      "parameters": {
+        "registry_partition": "error_type_registry",
+        "lookup_key": "error_type from failure-capture-trigger"
+      },
+      "outputs": {
+        "error_class": "transient | permanent | recoverable | unclassified",
+        "retry_eligible": "boolean",
+        "max_retries": "integer",
+        "known_fix_pattern": "pattern_id or null",
+        "escalation_policy": "log_and_notify | immediate_escalation | silent_log"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "routing-branch",
+      "role": "Routes to Path A if a known_fix_pattern exists for the classified error type. Routes to Path B if known_fix_pattern is null or error class is unclassified. Permanent errors with retry_eligible=false skip both paths and route directly to escalation.",
+      "parameters": {
+        "path_a_condition": "known_fix_pattern !== null && retry_eligible === true",
+        "path_b_condition": "known_fix_pattern === null && retry_eligible === true",
+        "permanent_condition": "retry_eligible === false"
+      }
+    },
+
+    {
+      "_section": "PATH A — Known Fix Pattern",
+      "id": "<REDACTED>",
+      "type": "catalog-lookup",
+      "role": "Retrieves the full fix pattern definition from the fix catalog by pattern ID. Fix patterns are deterministic — no LLM call is made on Path A.",
+      "parameters": {
+        "catalog_ref": "<REDACTED>",
+        "pattern_id": "known_fix_pattern from error-classifier"
+      },
+      "fix_pattern_types": {
+        "retry_with_backoff": "Wait configured delay, re-attempt failed operation unchanged",
+        "registry_key_repair": "Look up undefined key in fallback registry partition; substitute and re-execute",
+        "credential_refresh": "Trigger credential refresh via engine credential manager, then re-execute",
+        "cache_bypass": "Invalidate specific cache key, force fresh execution, repopulate",
+        "payload_sanitize": "Apply declared sanitization transform to input payload before re-execution"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "fix-applicator",
+      "role": "Applies the retrieved fix pattern to the failure context. Produces a corrected execution payload or modified execution parameters. Does not re-execute yet — fix is applied to a staging context first.",
+      "parameters": {
+        "fix_pattern": "from catalog-lookup",
+        "failure_context": "from failure-capture-trigger"
+      },
+      "outputs": {
+        "corrected_payload": "object — ready for contract validation",
+        "fix_applied": "pattern_id"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "contract-validator",
+      "role": "Validates the corrected payload against the failing agent's declared input contract before re-execution. This prevents a malformed fix from producing a second failure. If validation fails, routes to escalation — not to retry.",
+      "parameters": {
+        "contract_ref": "<REDACTED — agent contract schema path>",
+        "payload": "corrected_payload from fix-applicator"
+      },
+      "outputs": {
+        "validation_result": "passed | failed",
+        "validation_errors": "array — populated if failed"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "re-executor",
+      "role": "Re-runs the original failed workflow with the validated corrected payload. Tracks retry count against the contract's max_retries limit. On success, routes to result-logger. On failure, decrements retry count and returns to catalog-lookup if retries remain, or escalates if exhausted.",
+      "parameters": {
+        "agent_workflow_ref": "<REDACTED — resolved from routing registry>",
+        "payload": "corrected_payload from fix-applicator",
+        "retry_count_remaining": "integer — from execution context"
+      },
+      "outputs": {
+        "execution_status": "success | failed",
+        "retries_consumed": "integer"
+      }
+    },
+
+    {
+      "_section": "PATH B — AI-Assisted Repair",
+      "id": "<REDACTED>",
+      "type": "context-builder",
+      "role": "Assembles the structured repair context to submit to the repair model. Values are excluded — only structure and schema are included. This scopes the model's context to what is strictly necessary and reduces hallucination surface.",
+      "parameters": {
+        "context_fields": [
+          "error_type",
+          "error_message (sanitized)",
+          "failed_node_type",
+          "failed_node_version",
+          "input_payload_schema (structure only — no values)",
+          "contract_ref (agent contract for the failing component)",
+          "last_successful_execution (ISO 8601 timestamp)"
+        ]
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "ai-repair-model",
+      "role": "Submits the structured failure context to the repair model. Model returns a proposed fix — either a corrected payload transform, a parameter substitution, or a node configuration change. Model and prompt template are redacted.",
+      "parameters": {
+        "model": "<REDACTED>",
+        "prompt_template": "<REDACTED>",
+        "context": "from context-builder"
+      },
+      "outputs": {
+        "proposed_fix": "object — structured fix specification",
+        "confidence": "float 0.0–1.0",
+        "fix_type": "payload_transform | parameter_substitution | node_config_change"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "proposed-fix-validator",
+      "role": "Validates the AI-proposed fix against the agent's declared contract before application. Same validation gate as Path A — AI-generated fixes are not exempt from contract enforcement. If validation fails, decrements repair retry count. If max repair retries exhausted, routes to escalation.",
+      "parameters": {
+        "contract_ref": "<REDACTED>",
+        "proposed_fix": "from ai-repair-model"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "catalog-promotion-handler",
+      "role": "When AI-assisted repair produces a successful re-execution, this node adds the fix to the catalog with a human_review_pending flag. After a configurable number of successful applications without regression, the fix graduates to a confirmed catalog entry (Path A) for future occurrences.",
+      "parameters": {
+        "promotion_threshold": "<REDACTED — policy-configured>",
+        "human_review_flag": true,
+        "catalog_write_ref": "<REDACTED>"
+      }
+    },
+
+    {
+      "_section": "SHARED — Both Paths",
+      "id": "<REDACTED>",
+      "type": "escalation-handler",
+      "role": "Reached when all recovery options are exhausted, when a permanent error is classified, or when a proposed fix fails contract validation. Produces a structured escalation record and routes to the notification channel based on escalation_policy. immediate_escalation alerts synchronously; log_and_notify batches to a review queue.",
+      "parameters": {
+        "escalation_policy": "from error-classifier",
+        "notification_channel_ref": "<REDACTED>",
+        "escalation_record_schema": {
+          "escalation_id": "string",
+          "timestamp": "ISO 8601",
+          "error_type": "string",
+          "error_class": "string",
+          "affected_component": "string",
+          "recovery_attempts": "array of attempt records",
+          "retries_consumed": "integer",
+          "escalation_policy": "string",
+          "recommended_action": "string — from repair model or catalog"
+        }
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "result-logger",
+      "role": "Logs the final outcome of the recovery attempt to the error log data store. Emits structured observability events at each decision point — error captured, path selected, fix applied, validation result, re-execution result, retry count consumed, escalation triggered. These events feed the Error Recovery dashboard.",
+      "parameters": {
+        "log_store_ref": "<REDACTED — registry key>",
+        "observability_events": [
+          "error_captured",
+          "path_selected",
+          "fix_applied",
+          "validation_result",
+          "re_execution_result",
+          "retries_consumed",
+          "escalation_triggered"
+        ]
+      }
+    }
+  ],
+
+  "execution_paths": {
+    "path_a": "failure-capture-trigger → error-classifier → routing-branch → catalog-lookup → fix-applicator → contract-validator → re-executor → [success: result-logger] | [failed/exhausted: escalation-handler]",
+    "path_b": "failure-capture-trigger → error-classifier → routing-branch → context-builder → ai-repair-model → proposed-fix-validator → re-executor → [success: catalog-promotion-handler → result-logger] | [failed/exhausted: escalation-handler]",
+    "permanent": "failure-capture-trigger → error-classifier → routing-branch → escalation-handler → result-logger"
+  },
+
+  "design_notes": [
+    "The error handler runs asynchronously. The user receives a failure acknowledgment from the orchestrator immediately; recovery does not block the response path.",
+    "Contract validation is applied to every proposed fix — both catalog-sourced (Path A) and AI-generated (Path B). A fix that produces an invalid payload is escalated, not applied.",
+    "Retry counts are consumed across both Path A and Path B attempts within a single failure event. The counter does not reset between paths.",
+    "AI-generated fixes that succeed are promoted to the fix catalog with a human review flag. This makes the catalog self-expanding over time.",
+    "Permanent errors (retry_eligible=false) bypass both recovery paths entirely and route directly to escalation."
+  ]
+}
