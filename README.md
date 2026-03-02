@@ -109,10 +109,10 @@ Published materials reflect architectural and structural decisions only. Functio
 
 ## Design Principles
 
-- **Configuration over hardcoding** -Environment-specific values reside in a centralized registry, never inside workflow logic.
-- **Contracts over assumptions** -Every agent declares explicit input/output schemas enforced at commit time.
-- **Validation before delegation** -Low-confidence intent triggers clarification rather than speculative routing.
-- **Abstraction over coupling** -Agents share no direct dependencies; coordination flows through the orchestrator.
+- **Configuration over hardcoding** — Environment-specific values reside in a centralized registry, never inside workflow logic.
+- **Contracts over assumptions** — Every agent declares explicit input/output schemas enforced at commit time.
+- **Validation before delegation** — Low-confidence intent triggers clarification rather than speculative routing.
+- **Abstraction over coupling** — Agents share no direct dependencies; coordination flows through the orchestrator.
 
 ## Getting Started
 

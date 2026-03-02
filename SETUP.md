@@ -185,7 +185,14 @@ To manage n8n workflows directly from Claude Code:
    npm install -g n8n-mcp-server
    ```
 
-2. Add to your Claude Code MCP config (`~/.claude/claude_desktop_config.json` or equivalent):
+2. Register the server with Claude Code via CLI:
+   ```bash
+   claude mcp add n8n n8n-mcp-server \
+     --env N8N_API_URL=https://<your-n8n-instance>/api/v1 \
+     --env N8N_API_KEY=<your-n8n-api-key>
+   ```
+
+   Or add manually to `~/.claude/settings.json` under `mcpServers`:
    ```json
    {
      "mcpServers": {
