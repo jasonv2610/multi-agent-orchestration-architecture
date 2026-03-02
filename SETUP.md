@@ -15,7 +15,7 @@ These are the external services and credentials used directly by the 6 schedulin
 | [n8n](https://n8n.io) | All stages | Workflow automation runtime — executes all pipeline stages | — |
 | [Google Calendar API](https://developers.google.com/calendar/api/guides/overview) | Stage 04, 05 | Stage 04: reads existing events to detect conflicts. Stage 05: creates new calendar events and sends invitations. | Google Calendar OAuth2 |
 | [Microsoft Outlook API](https://learn.microsoft.com/en-us/graph/api/resources/calendar) | Stage 05 | Alternative calendar — creates Outlook events when attendee domain is Microsoft. Optional; Google Calendar is the default. | Microsoft Outlook OAuth2 |
-| SMTP | Stage 06 | Sends email notifications (confirmation, conflict alert, validation failure) to requestor. | SMTP |
+| Notification channel | Stage 06 | Dispatches confirmation, conflict alert, or failure message to the requestor. **Configurable** — the delivery node is disabled by default. Replace it with Telegram, a webhook, or any messaging integration your system uses. | Depends on channel |
 | PostgreSQL | Stage 06 | Persists scheduling logs to a database table. **Disabled by default** — enable the node in stage 06 only if you need persistent logs. | Postgres |
 
 ### Developer Interface
@@ -111,31 +111,29 @@ The credential names below must match **exactly** — the workflow files referen
 
 ---
 
-### 3. SMTP
+### 3. Notification Channel (Stage 06 — Configure for Your System)
 
-**Used in:** Stage 06 (email notifications — confirmation, conflict alert, validation failure)
+**Used in:** Stage 06 — the `Send Notification` node is **disabled by default**. You must replace it with your actual delivery mechanism before the pipeline can send notifications.
 
-**How to obtain:**
+**The notification payload is already prepared** by the `Prepare Notification` node above it. It contains:
+- `$json.notification.subject` — message subject / title
+- `$json.notification.body` — full message body
+- `$json.notification.recipients` — array of recipient addresses or IDs
+- `$json.notification.type` — `event_created`, `conflict_detected`, or `validation_failed`
 
-Choose any SMTP provider. Common options:
+**Common replacements:**
 
-| Provider | SMTP Host | Port | Notes |
-|----------|-----------|------|-------|
-| Gmail | `smtp.gmail.com` | 587 | Requires an [App Password](https://myaccount.google.com/apppasswords) — not your Gmail password |
-| SendGrid | `smtp.sendgrid.net` | 587 | Use `apikey` as username; API key as password |
-| Postmark | `smtp.postmarkapp.com` | 587 | Use API token as both username and password |
-| Mailgun | `smtp.mailgun.org` | 587 | Use SMTP credentials from Mailgun domain settings |
+| Channel | n8n Node | Credential Type |
+|---------|----------|-----------------|
+| Telegram | `Telegram` → Send Message | Telegram API (bot token) |
+| Email (SMTP) | `Send Email` | SMTP |
+| Slack | `Slack` → Send Message | Slack OAuth2 |
+| HTTP webhook | `HTTP Request` | Header Auth or none |
 
-**In n8n:**
-- **Settings → Credentials → Add Credential → SMTP**
-- Name: `SMTP Credentials` (exact match required)
-- Enter: Host, Port, Username, Password
-- TLS: enabled (recommended)
-
-**Also set this environment variable:**
-```bash
-NOTIFICATION_EMAIL_FROM=noreply@yourdomain.com
-```
+**To wire your channel:**
+1. Delete or keep disabled the existing `Send Notification` node
+2. Add your preferred notification node between `Prepare Notification` and `Log Completion`
+3. Map `$json.notification.body` (or subject/recipients) to the node's message fields
 
 ---
 
@@ -212,9 +210,6 @@ MIN_LEAD_TIME_MINUTES=60
 
 # Calendar routing
 PREFERRED_CALENDAR_SYSTEM=google   # or: outlook
-
-# Notifications
-NOTIFICATION_EMAIL_FROM=noreply@yourcompany.com
 ```
 
 ---
@@ -305,5 +300,6 @@ To manage n8n workflows directly from Claude Code:
 | Stage 02–06 not triggering | Verify all `WORKFLOW_ID_*` env vars are set to the correct n8n IDs |
 | Google Calendar errors | Re-authorize OAuth2 credential; check Calendar API is enabled in Google Cloud |
 | Conflict scan runs but skips | Confirm Merge node is present in `04_conflict_scan`; check both inputs are wired |
-| No email notifications | Verify SMTP credential; check `NOTIFICATION_EMAIL_FROM` is set |
+| Stage 06 notifications not sending | Confirm the `Send Notification` node is enabled and wired to your channel (Telegram, webhook, etc.) |
+| PostgreSQL insert errors | Check Postgres credential and confirm the `scheduling_logs` table exists (see DDL in Credential Setup) |
 | Enable debug logging | Set `N8N_LOG_LEVEL=debug` in your n8n environment |

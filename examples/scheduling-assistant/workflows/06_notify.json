@@ -35,14 +35,16 @@
                     "allowUnauthorizedCerts": false
                 }
             },
-            "id": "send-email",
-            "name": "Send Email Notification",
+            "id": "send-notification",
+            "name": "Send Notification",
             "type": "n8n-nodes-base.emailSend",
             "typeVersion": 2,
             "position": [
                 650,
                 300
             ],
+            "disabled": true,
+            "notes": "Placeholder delivery node — disabled by default. Replace this node with your actual notification channel: Telegram sendMessage, HTTP Request to a webhook, or any messaging integration supported by n8n. The notification payload (subject, body, recipients) is already prepared by the Prepare Notification node above.",
             "credentials": {
                 "smtp": {
                     "id": "smtp-credentials",
