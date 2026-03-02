@@ -29,7 +29,7 @@
             "typeVersion": 3,
             "position": [
                 450,
-                200
+                150
             ],
             "credentials": {
                 "googleCalendarOAuth2Api": {
@@ -40,14 +40,28 @@
         },
         {
             "parameters": {
-                "jsCode": "// Analyze calendar conflicts\n//\n// IMPORTANT: originalData is retrieved directly from the trigger node, not from\n// $input. After Check Google Calendar (getAll) runs, it replaces the item stream\n// with calendar event objects — $input no longer contains the original payload.\n// Using $('When called by another workflow').first().json ensures we always have\n// the validated scheduling data regardless of how many calendar events were returned,\n// including the zero-event case which would otherwise crash with items[0] undefined.\nconst originalData = $('When called by another workflow').first().json.validatedData\n  || $('When called by another workflow').first().json;\n\nconst requestedStart = new Date(originalData.normalized.startTime);\nconst requestedEnd = new Date(originalData.normalized.endTime);\n\n// Calendar events are the current input — all items returned by the calendar query\nconst calendarEvents = $input.all().map(item => item.json);\n\nconst conflicts = [];\n\n// Check each calendar event for time overlap with the requested window\nfor (const event of calendarEvents) {\n  const eventStart = new Date(event.start?.dateTime || event.start?.date);\n  const eventEnd = new Date(event.end?.dateTime || event.end?.date);\n\n  if (requestedStart < eventEnd && requestedEnd > eventStart) {\n    conflicts.push({\n      title: event.summary,\n      start: eventStart.toISOString(),\n      end: eventEnd.toISOString(),\n      attendees: event.attendees?.map(a => a.email) || [],\n      location: event.location || 'Not specified'\n    });\n  }\n}\n\n// Generate up to 3 alternative time slots when conflicts are detected\nconst alternatives = [];\nif (conflicts.length > 0) {\n  const duration = originalData.normalized.duration;\n\n  const alt1Start = new Date(requestedStart);\n  alt1Start.setHours(alt1Start.getHours() - 1);\n  alternatives.push({\n    startTime: alt1Start.toISOString(),\n    endTime: new Date(alt1Start.getTime() + duration * 60000).toISOString(),\n    reason: 'Earlier slot on same day'\n  });\n\n  const alt2Start = new Date(requestedEnd);\n  alt2Start.setHours(alt2Start.getHours() + 1);\n  alternatives.push({\n    startTime: alt2Start.toISOString(),\n    endTime: new Date(alt2Start.getTime() + duration * 60000).toISOString(),\n    reason: 'Later slot on same day'\n  });\n\n  const alt3Start = new Date(requestedStart);\n  alt3Start.setDate(alt3Start.getDate() + 1);\n  alternatives.push({\n    startTime: alt3Start.toISOString(),\n    endTime: new Date(alt3Start.getTime() + duration * 60000).toISOString(),\n    reason: 'Same time next day'\n  });\n}\n\nreturn [{\n  json: {\n    ...originalData,\n    conflictScan: {\n      hasConflicts: conflicts.length > 0,\n      conflictCount: conflicts.length,\n      conflicts,\n      alternatives,\n      scannedAt: new Date().toISOString(),\n      calendarSource: 'google_calendar'\n    },\n    stage: 'conflict_scanned',\n    processedAt: new Date().toISOString()\n  }\n}];"
+                "mode": "appendItems"
+            },
+            "id": "merge-calendar-data",
+            "name": "Merge Calendar Data",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3,
+            "position": [
+                650,
+                300
+            ],
+            "notes": "Input 0: original validated data (always 1 item, from trigger). Input 1: calendar events (0 or more items). appendItems guarantees Analyze Conflicts runs even when the calendar returns 0 results (no conflicts = happy path)."
+        },
+        {
+            "parameters": {
+                "jsCode": "// Analyze calendar conflicts\n//\n// Input structure after Merge (appendItems mode):\n//   items[0]     = original validated scheduling data (from trigger, guaranteed 1 item)\n//   items[1..n]  = calendar events in the requested time window (0 or more items)\n//\n// The Merge node ensures this code always runs — including when the calendar returns\n// 0 events (no conflicts), which is the happy path and the most common case.\n// Without the Merge, a 0-item getAll result would silently stop execution here.\n\nconst originalData = items[0].json.validatedData || items[0].json;\nconst requestedStart = new Date(originalData.normalized.startTime);\nconst requestedEnd = new Date(originalData.normalized.endTime);\n\n// Calendar events begin at index 1 — index 0 is the original scheduling data\nconst calendarEvents = items.slice(1).map(item => item.json);\n\nconst conflicts = [];\n\n// Check each calendar event for time overlap with the requested window\nfor (const event of calendarEvents) {\n  const eventStart = new Date(event.start?.dateTime || event.start?.date);\n  const eventEnd = new Date(event.end?.dateTime || event.end?.date);\n\n  if (requestedStart < eventEnd && requestedEnd > eventStart) {\n    conflicts.push({\n      title: event.summary,\n      start: eventStart.toISOString(),\n      end: eventEnd.toISOString(),\n      attendees: event.attendees?.map(a => a.email) || [],\n      location: event.location || 'Not specified'\n    });\n  }\n}\n\n// Generate up to 3 alternative time slots when conflicts are detected\nconst alternatives = [];\nif (conflicts.length > 0) {\n  const duration = originalData.normalized.duration;\n\n  const alt1Start = new Date(requestedStart);\n  alt1Start.setHours(alt1Start.getHours() - 1);\n  alternatives.push({\n    startTime: alt1Start.toISOString(),\n    endTime: new Date(alt1Start.getTime() + duration * 60000).toISOString(),\n    reason: 'Earlier slot on same day'\n  });\n\n  const alt2Start = new Date(requestedEnd);\n  alt2Start.setHours(alt2Start.getHours() + 1);\n  alternatives.push({\n    startTime: alt2Start.toISOString(),\n    endTime: new Date(alt2Start.getTime() + duration * 60000).toISOString(),\n    reason: 'Later slot on same day'\n  });\n\n  const alt3Start = new Date(requestedStart);\n  alt3Start.setDate(alt3Start.getDate() + 1);\n  alternatives.push({\n    startTime: alt3Start.toISOString(),\n    endTime: new Date(alt3Start.getTime() + duration * 60000).toISOString(),\n    reason: 'Same time next day'\n  });\n}\n\nreturn [{\n  json: {\n    ...originalData,\n    conflictScan: {\n      hasConflicts: conflicts.length > 0,\n      conflictCount: conflicts.length,\n      conflicts,\n      alternatives,\n      scannedAt: new Date().toISOString(),\n      calendarSource: 'google_calendar'\n    },\n    stage: 'conflict_scanned',\n    processedAt: new Date().toISOString()\n  }\n}];"
             },
             "id": "code-analyze-conflicts",
             "name": "Analyze Conflicts",
             "type": "n8n-nodes-base.code",
             "typeVersion": 2,
             "position": [
-                650,
+                850,
                 300
             ]
         },
@@ -67,7 +81,7 @@
             "type": "n8n-nodes-base.if",
             "typeVersion": 1,
             "position": [
-                850,
+                1050,
                 300
             ]
         },
@@ -96,7 +110,7 @@
             "type": "n8n-nodes-base.set",
             "typeVersion": 3.2,
             "position": [
-                1050,
+                1250,
                 200
             ]
         },
@@ -131,7 +145,7 @@
             "type": "n8n-nodes-base.set",
             "typeVersion": 3.2,
             "position": [
-                1050,
+                1250,
                 400
             ]
         },
@@ -147,7 +161,7 @@
             "type": "n8n-nodes-base.executeWorkflow",
             "typeVersion": 1,
             "position": [
-                1250,
+                1450,
                 200
             ]
         },
@@ -163,7 +177,7 @@
             "type": "n8n-nodes-base.executeWorkflow",
             "typeVersion": 1,
             "position": [
-                1250,
+                1450,
                 400
             ]
         }
@@ -176,11 +190,27 @@
                         "node": "Check Google Calendar",
                         "type": "main",
                         "index": 0
+                    },
+                    {
+                        "node": "Merge Calendar Data",
+                        "type": "main",
+                        "index": 0
                     }
                 ]
             ]
         },
         "Check Google Calendar": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Calendar Data",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Merge Calendar Data": {
             "main": [
                 [
                     {
@@ -261,6 +291,6 @@
         }
     ],
     "triggerCount": 0,
-    "updatedAt": "2026-01-19T19:59:10.000Z",
-    "versionId": "v1.0.0"
+    "updatedAt": "2026-01-19T20:15:00.000Z",
+    "versionId": "v1.1.0"
 }
