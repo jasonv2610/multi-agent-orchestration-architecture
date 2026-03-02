@@ -22,4 +22,4 @@ This work is licensed under the [Creative Commons Attribution-NonCommercial-NoDe
 
 The architectural concepts described in this repository — including registry-driven configuration, orchestrator-agent topology, and contract-first governance — are general system design principles. The operational implementations, infrastructure, and internal documentation from which this showcase is derived remain private and are not included in this repository.
 
-For permissions beyond the scope of this license, contact the repository owner via GitHub.
+For permissions beyond the scope of this license, contact: https://github.com/jasonv2610
