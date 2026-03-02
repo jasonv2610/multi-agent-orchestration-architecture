@@ -114,6 +114,10 @@ Published materials reflect architectural and structural decisions only. Functio
 - **Validation before delegation** -Low-confidence intent triggers clarification rather than speculative routing.
 - **Abstraction over coupling** -Agents share no direct dependencies; coordination flows through the orchestrator.
 
+## Getting Started
+
+See [SETUP.md](SETUP.md) for tool requirements, credential configuration, workflow import order, environment variables, and verification steps.
+
 ## License
 
 Refer to [LICENSE.md](LICENSE.md) for licensing terms.

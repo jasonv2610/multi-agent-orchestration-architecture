@@ -1,1 +1,45 @@
+# R artifacts
 .Rhistory
+.Rdata
+.Rproj.user/
+
+# Environment and secrets
+.env
+.env.*
+*.env
+*.secret
+secrets.json
+
+# OS artifacts
+.DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# Editor artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Node (if tooling is added later)
+node_modules/
+npm-debug.log*
+
+# Python (if tooling is added later)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

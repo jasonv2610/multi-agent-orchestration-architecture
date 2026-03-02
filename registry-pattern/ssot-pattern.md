@@ -26,7 +26,9 @@ Registry Lookup
     ▼
 Data Store Operation
 ```
+
 This enforces indirection between workflow logic and environment configuration.
+
 ## Registry Structure
 
 The registry is partitioned by responsibility:
