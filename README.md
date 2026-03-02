@@ -2,6 +2,8 @@
 
 A contract-first, registry-driven multi-agent orchestration architecture deployed on n8n Cloud. The system routes structured and unstructured inputs across specialized domain agents using deterministic routing and confidence-governed intent classification.
 
+The production system this showcase is derived from runs on n8n Cloud and handles live operational workflows across multiple domain agents.
+
 ## Architecture Overview
 
 A central orchestrator receives input from multiple channels, text, voice, and image, classifies intent using a routing layer, and delegates execution to an appropriate domain agent.
@@ -62,8 +64,9 @@ The contract and policy layer. Declares input/output schemas for each agent, rou
 The configuration SSOT layer. Centralizes all data store references, credential identifiers, routing rules, and cache class definitions. Workflows resolve identifiers at runtime from the registry; no environment-specific values are hard-coded into the workflow logic.
 
 **Examples**
-Sanitized structural examples illustrating how the architecture is implemented at the workflow level. All IDs, credentials, business logic, and prompt templates are redacted.
+Workflow examples ranging from redacted structural illustrations to a complete, importable pipeline implementation.
 
+- `examples/scheduling-assistant/` — Full 6-stage scheduling pipeline: actual n8n workflow exports, event payload schema, and manifest. Importable into any n8n instance.
 - `examples/redacted-orchestrator-workflow.json` — Master orchestrator routing structure with annotated node roles
 - `examples/redacted-agent-contract.yaml` — Domain agent input/output contract structure
 - `examples/redacted-workflow.json` — Domain agent workflow node structure

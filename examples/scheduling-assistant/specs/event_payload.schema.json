@@ -1,0 +1,447 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Scheduling Event Payload",
+    "description": "Schema for scheduling assistant event payloads across workflow stages",
+    "type": "object",
+    "required": [
+        "requestId",
+        "timestamp",
+        "rawRequest",
+        "requestorEmail",
+        "stage"
+    ],
+    "properties": {
+        "requestId": {
+            "type": "string",
+            "pattern": "^REQ-[0-9]+-[a-z0-9]+$",
+            "description": "Unique request identifier"
+        },
+        "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of request creation"
+        },
+        "rawRequest": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Original scheduling request text"
+        },
+        "requestorEmail": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the person making the request"
+        },
+        "meetingType": {
+            "type": "string",
+            "enum": [
+                "general",
+                "interview",
+                "sync",
+                "review",
+                "presentation",
+                "workshop"
+            ],
+            "default": "general",
+            "description": "Type of meeting being scheduled"
+        },
+        "priority": {
+            "type": "string",
+            "enum": [
+                "low",
+                "normal",
+                "high",
+                "urgent"
+            ],
+            "default": "normal",
+            "description": "Priority level of the scheduling request"
+        },
+        "stage": {
+            "type": "string",
+            "enum": [
+                "intake",
+                "validated",
+                "rejected",
+                "extracted",
+                "normalized",
+                "conflict_scanned",
+                "routed",
+                "exported",
+                "notification_prepared",
+                "completed"
+            ],
+            "description": "Current processing stage"
+        },
+        "status": {
+            "type": "string",
+            "enum": [
+                "validated",
+                "rejected",
+                "queued",
+                "processing",
+                "completed",
+                "failed"
+            ],
+            "description": "Overall request status"
+        },
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "source": {
+                    "type": "string",
+                    "description": "Source of the request (api, email, chat, etc.)"
+                },
+                "userAgent": {
+                    "type": "string",
+                    "description": "User agent string from the request"
+                },
+                "ipAddress": {
+                    "type": "string",
+                    "description": "IP address of the requestor"
+                }
+            }
+        },
+        "validation": {
+            "type": "object",
+            "required": [
+                "isValid",
+                "errors",
+                "stage"
+            ],
+            "properties": {
+                "isValid": {
+                    "type": "boolean",
+                    "description": "Whether the request passed validation"
+                },
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "List of validation errors"
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "List of validation warnings"
+                },
+                "stage": {
+                    "type": "string",
+                    "description": "Stage where validation occurred"
+                },
+                "validatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "checks": {
+                    "type": "object",
+                    "description": "Individual validation check results"
+                }
+            }
+        },
+        "extracted": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Extracted meeting title"
+                },
+                "dateTime": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Extracted date/time in ISO 8601 format"
+                },
+                "duration": {
+                    "type": "integer",
+                    "minimum": 15,
+                    "maximum": 480,
+                    "description": "Meeting duration in minutes"
+                },
+                "attendees": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "description": "List of attendee email addresses"
+                },
+                "location": {
+                    "type": "string",
+                    "description": "Meeting location (physical or virtual)"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Meeting description"
+                },
+                "extractionConfidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Confidence score of extraction (0-1)"
+                }
+            }
+        },
+        "normalized": {
+            "type": "object",
+            "required": [
+                "title",
+                "startTime",
+                "endTime",
+                "duration",
+                "attendees"
+            ],
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Normalized meeting title"
+                },
+                "startTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Meeting start time (ISO 8601)"
+                },
+                "endTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Meeting end time (ISO 8601)"
+                },
+                "duration": {
+                    "type": "integer",
+                    "minimum": 15,
+                    "maximum": 480,
+                    "description": "Meeting duration in minutes"
+                },
+                "attendees": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "description": "Validated attendee email addresses"
+                },
+                "location": {
+                    "type": "string",
+                    "description": "Normalized location"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Meeting description"
+                },
+                "timezone": {
+                    "type": "string",
+                    "description": "Timezone identifier (e.g., America/New_York)"
+                },
+                "allDay": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether this is an all-day event"
+                },
+                "reminders": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "method": {
+                                "type": "string",
+                                "enum": [
+                                    "email",
+                                    "popup",
+                                    "sms"
+                                ]
+                            },
+                            "minutes": {
+                                "type": "integer",
+                                "minimum": 0
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "conflictScan": {
+            "type": "object",
+            "properties": {
+                "hasConflicts": {
+                    "type": "boolean",
+                    "description": "Whether conflicts were detected"
+                },
+                "conflictCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Number of conflicts found"
+                },
+                "conflicts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "title": {
+                                "type": "string"
+                            },
+                            "start": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "end": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "attendees": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "location": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "alternatives": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "startTime": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "endTime": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "reason": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "scannedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "calendarSource": {
+                    "type": "string",
+                    "description": "Calendar system that was scanned"
+                }
+            }
+        },
+        "routing": {
+            "type": "object",
+            "properties": {
+                "targetSystem": {
+                    "type": "string",
+                    "enum": [
+                        "google",
+                        "outlook",
+                        "ical",
+                        "caldav"
+                    ],
+                    "description": "Target calendar system"
+                },
+                "routedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "routingReason": {
+                    "type": "string",
+                    "description": "Explanation of routing decision"
+                }
+            }
+        },
+        "export": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "description": "Whether export was successful"
+                },
+                "calendarSystem": {
+                    "type": "string",
+                    "description": "Calendar system where event was created"
+                },
+                "eventId": {
+                    "type": "string",
+                    "description": "ID of created calendar event"
+                },
+                "eventUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL to view the event"
+                },
+                "eventCreatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "attendeesNotified": {
+                    "type": "boolean",
+                    "description": "Whether attendees were automatically notified"
+                }
+            }
+        },
+        "notification": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "event_created",
+                        "conflict_detected",
+                        "validation_failed",
+                        "general"
+                    ],
+                    "description": "Type of notification sent"
+                },
+                "subject": {
+                    "type": "string",
+                    "description": "Email subject line"
+                },
+                "body": {
+                    "type": "string",
+                    "description": "Email body content"
+                },
+                "recipients": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "description": "List of notification recipients"
+                },
+                "sent": {
+                    "type": "boolean",
+                    "description": "Whether notification was successfully sent"
+                },
+                "sentAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "confirmationCode": {
+                    "type": "string",
+                    "description": "Unique confirmation code for this notification"
+                },
+                "deliveryStatus": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "success",
+                        "failed"
+                    ],
+                    "description": "Delivery status of the notification"
+                }
+            }
+        },
+        "processedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of last processing step"
+        }
+    }
+}

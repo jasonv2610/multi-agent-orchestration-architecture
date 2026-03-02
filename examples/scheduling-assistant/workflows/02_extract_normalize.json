@@ -1,0 +1,153 @@
+{
+    "name": "Scheduling Assistant - 02 Extract & Normalize",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "manual-trigger",
+            "name": "When called by another workflow",
+            "type": "n8n-nodes-base.executeWorkflowTrigger",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// NLP-based extraction of scheduling details\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json.queuedRequest || item.json;\n  const rawRequest = data.rawRequest || '';\n  \n  // Extract meeting title (simple pattern matching)\n  let title = 'Meeting';\n  const titlePatterns = [\n    /(?:meeting|call|discussion|sync)\\s+(?:about|regarding|for|on)\\s+([\\w\\s]+)/i,\n    /([\\w\\s]+)\\s+(?:meeting|call|discussion)/i\n  ];\n  \n  for (const pattern of titlePatterns) {\n    const match = rawRequest.match(pattern);\n    if (match && match[1]) {\n      title = match[1].trim();\n      break;\n    }\n  }\n  \n  // Extract date/time (basic patterns)\n  let dateTime = null;\n  let duration = 30; // default 30 minutes\n  \n  const timePatterns = [\n    /tomorrow\\s+at\\s+(\\d{1,2}):?(\\d{2})?\\s*(am|pm)?/i,\n    /(?:on\\s+)?(\\d{1,2})\\/(\\d{1,2})\\s+at\\s+(\\d{1,2}):?(\\d{2})?\\s*(am|pm)?/i,\n    /(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\\s+at\\s+(\\d{1,2}):?(\\d{2})?\\s*(am|pm)?/i\n  ];\n  \n  // Duration extraction\n  const durationMatch = rawRequest.match(/(\\d+)\\s*(hour|hr|minute|min)s?/i);\n  if (durationMatch) {\n    const value = parseInt(durationMatch[1]);\n    const unit = durationMatch[2].toLowerCase();\n    duration = unit.startsWith('hour') || unit === 'hr' ? value * 60 : value;\n  }\n  \n  // Parse \"tomorrow at 2pm\" example\n  const tomorrowMatch = rawRequest.match(/tomorrow\\s+at\\s+(\\d{1,2}):?(\\d{2})?\\s*(am|pm)?/i);\n  if (tomorrowMatch) {\n    const tomorrow = new Date();\n    tomorrow.setDate(tomorrow.getDate() + 1);\n    let hours = parseInt(tomorrowMatch[1]);\n    const minutes = tomorrowMatch[2] ? parseInt(tomorrowMatch[2]) : 0;\n    const meridiem = tomorrowMatch[3]?.toLowerCase();\n    \n    if (meridiem === 'pm' && hours < 12) hours += 12;\n    if (meridiem === 'am' && hours === 12) hours = 0;\n    \n    tomorrow.setHours(hours, minutes, 0, 0);\n    dateTime = tomorrow.toISOString();\n  }\n  \n  // Extract attendees (email pattern)\n  const emailPattern = /[\\w.-]+@[\\w.-]+\\.[\\w]+/g;\n  const attendees = rawRequest.match(emailPattern) || [];\n  \n  // Add requestor if not in attendees\n  if (data.requestorEmail && !attendees.includes(data.requestorEmail)) {\n    attendees.unshift(data.requestorEmail);\n  }\n  \n  // Extract location\n  let location = 'virtual';\n  const locationPatterns = [\n    /(?:at|in|location:?)\\s+([\\w\\s]+(?:room|office|building|floor))/i,\n    /zoom|teams|meet|webex/i\n  ];\n  \n  for (const pattern of locationPatterns) {\n    const match = rawRequest.match(pattern);\n    if (match) {\n      location = match[0];\n      break;\n    }\n  }\n  \n  const extracted = {\n    ...data,\n    extracted: {\n      title: title,\n      dateTime: dateTime,\n      duration: duration,\n      attendees: attendees,\n      location: location,\n      description: rawRequest,\n      extractionConfidence: dateTime ? 0.8 : 0.3\n    },\n    stage: 'extracted',\n    processedAt: new Date().toISOString()\n  };\n  \n  results.push({ json: extracted });\n}\n\nreturn results;"
+            },
+            "id": "code-extract-data",
+            "name": "Extract Scheduling Details",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Normalize and standardize extracted data\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json;\n  const extracted = data.extracted;\n  \n  // Normalize date/time to ISO 8601 format\n  let normalizedDateTime = extracted.dateTime;\n  if (!normalizedDateTime) {\n    // If no date extracted, suggest next available slot (tomorrow 2pm)\n    const defaultDate = new Date();\n    defaultDate.setDate(defaultDate.getDate() + 1);\n    defaultDate.setHours(14, 0, 0, 0);\n    normalizedDateTime = defaultDate.toISOString();\n  }\n  \n  // Normalize duration (ensure it's a valid number)\n  let normalizedDuration = extracted.duration;\n  if (!normalizedDuration || normalizedDuration < 15) {\n    normalizedDuration = 30; // Default to 30 minutes\n  }\n  if (normalizedDuration > 480) {\n    normalizedDuration = 480; // Max 8 hours\n  }\n  \n  // Normalize attendees (validate emails)\n  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n  const normalizedAttendees = extracted.attendees.filter(email => \n    emailRegex.test(email)\n  );\n  \n  // Normalize location\n  let normalizedLocation = extracted.location;\n  if (normalizedLocation.toLowerCase().match(/zoom|teams|meet|webex/)) {\n    normalizedLocation = 'Virtual Meeting';\n  }\n  \n  // Calculate end time\n  const startTime = new Date(normalizedDateTime);\n  const endTime = new Date(startTime.getTime() + normalizedDuration * 60000);\n  \n  const normalized = {\n    ...data,\n    normalized: {\n      title: extracted.title,\n      startTime: startTime.toISOString(),\n      endTime: endTime.toISOString(),\n      duration: normalizedDuration,\n      attendees: normalizedAttendees,\n      location: normalizedLocation,\n      description: extracted.description,\n      timezone: process.env.CALENDAR_TIMEZONE || 'America/New_York',\n      allDay: false,\n      reminders: [\n        { method: 'email', minutes: 30 },\n        { method: 'popup', minutes: 10 }\n      ]\n    },\n    stage: 'normalized',\n    processedAt: new Date().toISOString()\n  };\n  \n  results.push({ json: normalized });\n}\n\nreturn results;"
+            },
+            "id": "code-normalize-data",
+            "name": "Normalize Data",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "normalized-output",
+                            "name": "schedulingData",
+                            "value": "={{$json}}",
+                            "type": "object"
+                        },
+                        {
+                            "id": "next-stage",
+                            "name": "nextWorkflow",
+                            "value": "03_validate",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-output",
+            "name": "Set Output Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.2,
+            "position": [
+                850,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "workflowId": "={{$env.WORKFLOW_ID_VALIDATE}}",
+                "options": {
+                    "waitForSubWorkflow": false
+                }
+            },
+            "id": "execute-validate",
+            "name": "Trigger Validation",
+            "type": "n8n-nodes-base.executeWorkflow",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "When called by another workflow": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Scheduling Details",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Scheduling Details": {
+            "main": [
+                [
+                    {
+                        "node": "Normalize Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Normalize Data": {
+            "main": [
+                [
+                    {
+                        "node": "Set Output Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Set Output Data": {
+            "main": [
+                [
+                    {
+                        "node": "Trigger Validation",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "saveExecutionProgress": true,
+        "saveDataErrorExecution": "all",
+        "saveDataSuccessExecution": "all"
+    },
+    "staticData": null,
+    "tags": [
+        {
+            "name": "scheduling-assistant",
+            "id": "scheduling-tag-001"
+        },
+        {
+            "name": "extraction",
+            "id": "extraction-tag-001"
+        }
+    ],
+    "triggerCount": 0,
+    "updatedAt": "2026-01-19T19:59:10.000Z",
+    "versionId": "v1.0.0"
+}

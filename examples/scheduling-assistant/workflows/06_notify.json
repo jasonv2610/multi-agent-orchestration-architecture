@@ -1,0 +1,151 @@
+{
+    "name": "Scheduling Assistant - 06 Notify",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "workflow-trigger",
+            "name": "When called by another workflow",
+            "type": "n8n-nodes-base.executeWorkflowTrigger",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Determine notification type and prepare message\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json.exportedData || item.json.conflictData || item.json.invalidData || item.json;\n  const notificationType = item.json.notificationType || 'event_created';\n  \n  let subject = '';\n  let messageBody = '';\n  let recipients = [];\n  \n  // Get requestor email\n  const requestorEmail = data.requestorEmail || data.normalized?.attendees?.[0] || '';\n  if (requestorEmail) {\n    recipients.push(requestorEmail);\n  }\n  \n  // Build notification based on type\n  switch (notificationType) {\n    case 'event_created':\n      subject = `✅ Meeting Scheduled: ${data.normalized.title}`;\n      messageBody = `\nYour meeting has been successfully scheduled:\n\n📅 Event: ${data.normalized.title}\n🕒 Time: ${new Date(data.normalized.startTime).toLocaleString()}\n⏱️ Duration: ${data.normalized.duration} minutes\n📍 Location: ${data.normalized.location}\n👥 Attendees: ${data.normalized.attendees.join(', ')}\n\n🔗 Calendar Link: ${data.export?.eventUrl || 'Check your calendar'}\n\nEvent ID: ${data.export?.eventId || data.requestId}\n\nAll attendees have been notified via calendar invitation.\n      `;\n      break;\n      \n    case 'conflict_detected':\n      subject = `⚠️ Scheduling Conflict Detected: ${data.normalized.title}`;\n      messageBody = `\nWe detected a conflict with your requested meeting time:\n\n📅 Requested: ${data.normalized.title}\n🕒 Time: ${new Date(data.normalized.startTime).toLocaleString()}\n\n❌ Conflicts Found: ${data.conflictScan.conflictCount}\n\nConflicting Events:\n${data.conflictScan.conflicts.map(c => `  • ${c.title} (${new Date(c.start).toLocaleString()} - ${new Date(c.end).toLocaleString()})`).join('\\n')}\n\n💡 Suggested Alternative Times:\n${data.conflictScan.alternatives.map((alt, idx) => `  ${idx + 1}. ${new Date(alt.startTime).toLocaleString()} - ${alt.reason}`).join('\\n')}\n\nPlease reply with your preferred alternative time, or suggest a different time.\n      `;\n      break;\n      \n    case 'validation_failed':\n      subject = `❌ Scheduling Request Failed: ${data.normalized?.title || 'Meeting'}`;\n      messageBody = `\nYour scheduling request could not be processed due to validation errors:\n\n📅 Requested: ${data.normalized?.title || 'Meeting'}\n🕒 Time: ${data.normalized?.startTime ? new Date(data.normalized.startTime).toLocaleString() : 'Not specified'}\n\n❌ Errors:\n${data.validation.errors.map(e => `  • ${e}`).join('\\n')}\n\n${data.validation.warnings.length > 0 ? `⚠️ Warnings:\\n${data.validation.warnings.map(w => `  • ${w}`).join('\\n')}` : ''}\n\nPlease review the errors and submit a corrected request.\n      `;\n      break;\n      \n    default:\n      subject = `Meeting Update: ${data.normalized?.title || 'Notification'}`;\n      messageBody = `\nYour scheduling request has been processed.\n\nRequest ID: ${data.requestId}\nStatus: ${data.status}\n      `;\n  }\n  \n  const notificationData = {\n    ...data,\n    notification: {\n      type: notificationType,\n      subject: subject,\n      body: messageBody,\n      recipients: recipients,\n      preparedAt: new Date().toISOString(),\n      confirmationCode: `CONF-${Date.now()}`\n    },\n    stage: 'notification_prepared',\n    processedAt: new Date().toISOString()\n  };\n  \n  results.push({ json: notificationData });\n}\n\nreturn results;"
+            },
+            "id": "code-prepare-notification",
+            "name": "Prepare Notification",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fromEmail": "={{$env.NOTIFICATION_EMAIL_FROM || 'noreply@scheduling.com'}}",
+                "toEmail": "={{$json.notification.recipients.join(',')}}",
+                "subject": "={{$json.notification.subject}}",
+                "text": "={{$json.notification.body}}",
+                "options": {
+                    "allowUnauthorizedCerts": false
+                }
+            },
+            "id": "send-email",
+            "name": "Send Email Notification",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2,
+            "position": [
+                650,
+                300
+            ],
+            "credentials": {
+                "smtp": {
+                    "id": "smtp-credentials",
+                    "name": "SMTP Credentials"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Log notification delivery\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json;\n  \n  const finalResult = {\n    ...data,\n    notification: {\n      ...data.notification,\n      sent: true,\n      sentAt: new Date().toISOString(),\n      deliveryStatus: 'success'\n    },\n    stage: 'completed',\n    completedAt: new Date().toISOString(),\n    summary: {\n      requestId: data.requestId,\n      status: data.status,\n      notificationType: data.notification.type,\n      recipients: data.notification.recipients,\n      processingTime: new Date() - new Date(data.timestamp)\n    }\n  };\n  \n  results.push({ json: finalResult });\n}\n\nreturn results;"
+            },
+            "id": "code-log-completion",
+            "name": "Log Completion",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                850,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "insert",
+                "table": "scheduling_logs",
+                "columns": "request_id, status, notification_type, completed_at, processing_time_ms",
+                "options": {}
+            },
+            "id": "database-log",
+            "name": "Store in Database (Optional)",
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2,
+            "position": [
+                1050,
+                300
+            ],
+            "disabled": true,
+            "notes": "Enable this node if you want to persist scheduling logs to a database"
+        }
+    ],
+    "connections": {
+        "When called by another workflow": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Notification",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Notification": {
+            "main": [
+                [
+                    {
+                        "node": "Send Email Notification",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Email Notification": {
+            "main": [
+                [
+                    {
+                        "node": "Log Completion",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Log Completion": {
+            "main": [
+                [
+                    {
+                        "node": "Store in Database (Optional)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "saveExecutionProgress": true,
+        "saveDataErrorExecution": "all",
+        "saveDataSuccessExecution": "all"
+    },
+    "staticData": null,
+    "tags": [
+        {
+            "name": "scheduling-assistant",
+            "id": "scheduling-tag-001"
+        },
+        {
+            "name": "notification",
+            "id": "notification-tag-001"
+        }
+    ],
+    "triggerCount": 0,
+    "updatedAt": "2026-01-19T20:02:35.000Z",
+    "versionId": "v1.0.0"
+}
