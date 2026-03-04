@@ -1,5 +1,7 @@
 # Multi-Agent Orchestration Architecture
 
+[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC_BY--NC--ND_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
 A contract-first, registry-driven multi-agent orchestration architecture deployed on n8n Cloud. The system routes structured and unstructured inputs across specialized domain agents using deterministic routing and confidence-governed intent classification.
 
 Built for engineers designing production multi-agent systems who want architectural patterns beyond single-workflow tutorials: registry-based configuration, formal agent contracts, and autonomous error recovery.
