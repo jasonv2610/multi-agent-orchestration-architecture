@@ -1,0 +1,21 @@
+# ---------------------------------------------------------------
+# GitHub Linguist overrides
+# n8n workflow exports and registry JSON are data artifacts,
+# not source code - exclude from language statistics.
+# ---------------------------------------------------------------
+
+# n8n workflow exports (data, not code)
+examples/**/*.json        linguist-detectable=false
+examples/**/*.yaml        linguist-detectable=false
+registry-pattern/*.json   linguist-detectable=false
+
+# Schema files (data definitions)
+**/*.schema.json          linguist-detectable=false
+
+# Package manifest (config, not logic)
+package.json              linguist-detectable=false
+package-lock.json         linguist-detectable=false
+
+# R history files (not intentional code)
+.Rhistory                 linguist-detectable=false
+governance/.Rhistory      linguist-detectable=false
