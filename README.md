@@ -76,6 +76,11 @@ Workflow examples ranging from redacted structural illustrations to a complete, 
 - `examples/redacted-agent-contract.yaml`: Domain agent input/output contract structure
 - `examples/redacted-workflow.json`: Domain agent workflow node structure
 
+**Notebooks**
+Interactive Python demos of core architectural patterns. Runnable without credentials or live system access.
+
+- `notebooks/routing-system-demo.ipynb`: End-to-end routing pipeline demo - Tier 1 shortcode matching, Tier 2 LLM classification simulation, confidence gate visualization, and 30-day routing distribution charts.
+
 **Documentation** *(private)*
 Internal knowledge base, prompt templates, n8n execution standards, debugging patterns, and operational runbooks. Not included in this public showcase.
 
