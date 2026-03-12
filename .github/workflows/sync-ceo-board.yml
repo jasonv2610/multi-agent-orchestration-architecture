@@ -1,0 +1,44 @@
+name: JVI CEO Board Sync
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Compute git metrics
+        id: metrics
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          MSG=$(git log -1 --format='%s' | head -c 80 | tr -d "'\"\\")
+          DATE=$(git log -1 --format='%ci')
+          DAYS=$(( ($(date +%s) - $(git log -1 --format='%ct')) / 86400 ))
+          FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | wc -l | tr -d ' ')
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "msg=$MSG" >> $GITHUB_OUTPUT
+          echo "date=$DATE" >> $GITHUB_OUTPUT
+          echo "days=$DAYS" >> $GITHUB_OUTPUT
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+          if [ "$DAYS" -le 7 ]; then HEALTH="green"
+          elif [ "$DAYS" -le 30 ]; then HEALTH="yellow"
+          else HEALTH="red"; fi
+          echo "health=$HEALTH" >> $GITHUB_OUTPUT
+
+      - name: Dispatch to CEO Board
+        env:
+          GH_TOKEN: ${{ secrets.JVI_PAT }}
+        run: |
+          gh api repos/jasonv2610/jvi-enterprise/dispatches \
+            --method POST \
+            --field event_type=sync-repo-status \
+            --field "client_payload={\"entity_id\":\"${{ github.event.repository.name }}\",\"sha\":\"${{ steps.metrics.outputs.sha }}\",\"message\":\"${{ steps.metrics.outputs.msg }}\",\"date\":\"${{ steps.metrics.outputs.date }}\",\"days_since\":${{ steps.metrics.outputs.days }},\"files_changed\":${{ steps.metrics.outputs.files }},\"health\":\"${{ steps.metrics.outputs.health }}\",\"branch\":\"${{ github.ref_name }}\",\"machine\":\"GitHub-Actions\",\"trigger\":\"github-push\"}"
