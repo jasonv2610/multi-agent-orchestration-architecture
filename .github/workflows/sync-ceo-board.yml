@@ -53,18 +53,20 @@ jobs:
             "event_type": "sync-repo-status",
             "client_payload": {
               "entity_id": "${{ github.event.repository.name }}",
-              "sha": "${{ steps.metrics.outputs.sha }}",
-              "message": "${{ steps.metrics.outputs.msg }}",
-              "date": "${{ steps.metrics.outputs.date }}",
+              "health": "${{ steps.metrics.outputs.health }}",
               "last_push": "${{ steps.metrics.outputs.last_push }}",
               "days_since": ${{ steps.metrics.outputs.days }},
-              "files_changed": ${{ steps.metrics.outputs.files }},
               "week_commits": ${{ steps.metrics.outputs.week_commits }},
               "open_prs": ${{ steps.metrics.outputs.open_prs }},
-              "health": "${{ steps.metrics.outputs.health }}",
-              "branch": "${{ github.ref_name }}",
+              "trigger": "github-push",
               "machine": "GitHub-Actions",
-              "trigger": "github-push"
+              "git": {
+                "sha": "${{ steps.metrics.outputs.sha }}",
+                "message": "${{ steps.metrics.outputs.msg }}",
+                "date": "${{ steps.metrics.outputs.date }}",
+                "branch": "${{ github.ref_name }}",
+                "files_changed": ${{ steps.metrics.outputs.files }}
+              }
             }
           }
           EOF
