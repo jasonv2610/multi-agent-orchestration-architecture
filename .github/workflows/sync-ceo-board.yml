@@ -18,17 +18,25 @@ jobs:
 
       - name: Compute git metrics
         id: metrics
+        env:
+          GH_TOKEN: ${{ secrets.JVI_PAT || github.token }}
         run: |
           SHA=$(git rev-parse --short HEAD)
           MSG=$(git log -1 --format='%s' | head -c 80 | tr -d "'\"\\")
           DATE=$(git log -1 --format='%ci')
+          LAST_PUSH=$(date -u +"%Y-%m-%d")
           DAYS=$(( ($(date +%s) - $(git log -1 --format='%ct')) / 86400 ))
           FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | wc -l | tr -d ' ')
+          WEEK_COMMITS=$(git log --since='1 week ago' --oneline 2>/dev/null | wc -l | tr -d ' ')
+          OPEN_PRS=$(gh pr list --state open --json number --jq 'length' 2>/dev/null || echo "0")
           echo "sha=$SHA" >> $GITHUB_OUTPUT
           echo "msg=$MSG" >> $GITHUB_OUTPUT
           echo "date=$DATE" >> $GITHUB_OUTPUT
+          echo "last_push=$LAST_PUSH" >> $GITHUB_OUTPUT
           echo "days=$DAYS" >> $GITHUB_OUTPUT
           echo "files=$FILES" >> $GITHUB_OUTPUT
+          echo "week_commits=$WEEK_COMMITS" >> $GITHUB_OUTPUT
+          echo "open_prs=$OPEN_PRS" >> $GITHUB_OUTPUT
           if [ "$DAYS" -le 7 ]; then HEALTH="green"
           elif [ "$DAYS" -le 30 ]; then HEALTH="yellow"
           else HEALTH="red"; fi
@@ -40,5 +48,23 @@ jobs:
         run: |
           gh api repos/jasonv2610/jvi-enterprise/dispatches \
             --method POST \
-            --field event_type=sync-repo-status \
-            --field "client_payload={\"entity_id\":\"${{ github.event.repository.name }}\",\"sha\":\"${{ steps.metrics.outputs.sha }}\",\"message\":\"${{ steps.metrics.outputs.msg }}\",\"date\":\"${{ steps.metrics.outputs.date }}\",\"days_since\":${{ steps.metrics.outputs.days }},\"files_changed\":${{ steps.metrics.outputs.files }},\"health\":\"${{ steps.metrics.outputs.health }}\",\"branch\":\"${{ github.ref_name }}\",\"machine\":\"GitHub-Actions\",\"trigger\":\"github-push\"}"
+            --input - <<EOF
+          {
+            "event_type": "sync-repo-status",
+            "client_payload": {
+              "entity_id": "${{ github.event.repository.name }}",
+              "sha": "${{ steps.metrics.outputs.sha }}",
+              "message": "${{ steps.metrics.outputs.msg }}",
+              "date": "${{ steps.metrics.outputs.date }}",
+              "last_push": "${{ steps.metrics.outputs.last_push }}",
+              "days_since": ${{ steps.metrics.outputs.days }},
+              "files_changed": ${{ steps.metrics.outputs.files }},
+              "week_commits": ${{ steps.metrics.outputs.week_commits }},
+              "open_prs": ${{ steps.metrics.outputs.open_prs }},
+              "health": "${{ steps.metrics.outputs.health }}",
+              "branch": "${{ github.ref_name }}",
+              "machine": "GitHub-Actions",
+              "trigger": "github-push"
+            }
+          }
+          EOF
