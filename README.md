@@ -86,7 +86,7 @@ Agents operate independently against dedicated data stores and are bound by expl
 
 ## Repository Structure
 
-The system is organized into five logical layers. This public showcase includes architecture, governance, registry, and integration patterns. Internal operational documentation is private.
+The system is organized into five logical layers. This repository includes architecture documentation, governance tooling, and workflow examples. Internal operational documentation is private. Internal operational documentation is private.
 
 **Architecture**
 Design documentation for each system component. Covers the orchestration pattern, domain agent model, scheduling sub-pipeline, error recovery model, integration layer, and observability design.
@@ -116,7 +116,7 @@ Interactive Python demos of core architectural patterns. Runnable without creden
 - `notebooks/routing-system-demo.ipynb`: End-to-end routing pipeline demo - Tier 1 shortcode matching, Tier 2 LLM classification simulation, confidence gate visualization, and 30-day routing distribution charts.
 
 **Documentation** *(private)*
-Internal knowledge base, prompt templates, n8n execution standards, debugging patterns, and operational runbooks. Not included in this public showcase.
+Internal knowledge base, prompt templates, n8n execution standards, debugging patterns, and operational runbooks. Not included in this release.
 
 ## Core Capabilities
 
@@ -130,7 +130,7 @@ Internal knowledge base, prompt templates, n8n execution standards, debugging pa
 
 ## Scope and Exclusions
 
-This repository is a curated public showcase of architecture, workflow structure, and design patterns from a larger private system. The following are not included:
+This repository is a curated release of architecture, workflow structure, and design patterns from a larger private system. The following are not included:
 
 - Proprietary prompt engineering and LLM routing logic
 - Production credentials and environment-specific configuration
