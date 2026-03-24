@@ -3,11 +3,15 @@
 [![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC_BY--NC--ND_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 ![Status](https://img.shields.io/badge/Status-Production_Architecture-6d8b74?style=flat-square&labelColor=1a1a2e)
 ![Validation](https://img.shields.io/badge/Validation-Private_Pipeline-6d8b74?style=flat-square&labelColor=1a1a2e)
-![Type](https://img.shields.io/badge/Type-Public_Portfolio-6d8b74?style=flat-square&labelColor=1a1a2e)
+![Type](https://img.shields.io/badge/Type-Architecture_System-6d8b74?style=flat-square&labelColor=1a1a2e)
 
 > This repository represents a production architecture layer. Execution pipelines and validation operate in a private environment.
 
-86-item inventory lookups in under 30 seconds. VIP contract turnaround reduced from 2 days to same-session. Zero manual receipt entry. This is a live production system, not a tutorial.
+86-item inventory lookups in under 30 seconds  
+VIP contract turnaround reduced from 2 days to same-session  
+Zero manual receipt entry  
+
+This is a production system, not a tutorial.
 
 A contract-first, registry-driven multi-agent orchestration architecture on n8n Cloud. Seven specialized agents. One orchestrator. Zero manual intervention.
 
@@ -22,6 +26,24 @@ Built for engineers who want production-grade patterns: registry-based configura
 | Documents | VIP contract turnaround from 2 days to same-session via Google Docs API |
 | Finance | Manual receipt entry eliminated; OCR auto-categorization logs expenses in one step |
 | Self-Healing | Resolves known errors without human input; escalates unknowns to Telegram |
+
+## Business Impact
+
+- Reduced contract turnaround time by over 90%
+- Eliminated manual receipt entry through OCR automation
+- Enabled real-time inventory visibility across 80+ items
+- Autonomous error recovery minimizes operational disruptions
+
+## Execution Example
+
+**Input:** Voice message: "86 the salmon" (mark menu item as unavailable)
+
+1. Messaging interface receives the voice attachment and passes it to the orchestrator
+2. Orchestrator routes audio through a speech-to-text transcription node
+3. Transcript matches a deterministic shortcode pattern, so LLM classification is bypassed
+4. Operations Agent is invoked with the extracted item identifier
+5. Agent updates the inventory data store with availability status and timestamp
+6. Confirmation is synthesized to audio and returned as a voice reply
 
 ## Architecture Overview
 
@@ -95,17 +117,6 @@ Interactive Python demos of core architectural patterns. Runnable without creden
 
 **Documentation** *(private)*
 Internal knowledge base, prompt templates, n8n execution standards, debugging patterns, and operational runbooks. Not included in this public showcase.
-
-## Execution Example
-
-**Input:** Voice message: "86 the salmon" (mark menu item as unavailable)
-
-1. Messaging interface receives the voice attachment and passes it to the orchestrator
-2. Orchestrator routes audio through a speech-to-text transcription node
-3. Transcript matches a deterministic shortcode pattern, so LLM classification is bypassed
-4. Operations Agent is invoked with the extracted item identifier
-5. Agent updates the inventory data store with availability status and timestamp
-6. Confirmation is synthesized to audio and returned as a voice reply
 
 ## Core Capabilities
 
