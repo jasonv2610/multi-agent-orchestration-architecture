@@ -3,13 +3,13 @@
 [![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC_BY--NC--ND_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 ![Status](https://img.shields.io/badge/Status-Production_Architecture-6d8b74?style=flat-square&labelColor=1a1a2e)
 ![Validation](https://img.shields.io/badge/Validation-Private_Pipeline-6d8b74?style=flat-square&labelColor=1a1a2e)
-![Type](https://img.shields.io/badge/Type-Portfolio_Sanitized-6d8b74?style=flat-square&labelColor=1a1a2e)
+![Type](https://img.shields.io/badge/Type-Public_Portfolio-6d8b74?style=flat-square&labelColor=1a1a2e)
 
-> This repository represents a sanitized architecture layer. Execution pipelines and validation run in a private environment.
+> This repository represents a production architecture layer. Execution pipelines and validation operate in a private environment.
 
-86-item inventory lookups in under 30 seconds. VIP contracts from 2 days to same-session. Zero manual receipt entry. This is a live production system, not a tutorial project.
+86-item inventory lookups in under 30 seconds. VIP contract turnaround reduced from 2 days to same-session. Zero manual receipt entry. This is a live production system, not a tutorial.
 
-A contract-first, registry-driven multi-agent orchestration architecture on n8n Cloud. Seven specialized agents. One orchestrator. Zero manual decisions.
+A contract-first, registry-driven multi-agent orchestration architecture on n8n Cloud. Seven specialized agents. One orchestrator. Zero manual intervention.
 
 Built for engineers who want production-grade patterns: registry-based configuration, formal agent contracts, and autonomous error recovery.
 
