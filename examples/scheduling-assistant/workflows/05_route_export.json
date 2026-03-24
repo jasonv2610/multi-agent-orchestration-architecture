@@ -1,0 +1,285 @@
+{
+    "name": "Scheduling Assistant - 05 Route & Export",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "workflow-trigger",
+            "name": "When called by another workflow",
+            "type": "n8n-nodes-base.executeWorkflowTrigger",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Determine target calendar system based on attendees or preferences\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json.clearData || item.json;\n  const normalized = data.normalized;\n  \n  // Routing logic: determine calendar system\n  let calendarSystem = 'google'; // default\n  \n  // Check environment variable or attendee domain preferences\n  const primaryAttendee = normalized.attendees[0];\n  if (primaryAttendee) {\n    const domain = primaryAttendee.split('@')[1];\n    \n    // Microsoft domains → Outlook\n    if (domain.includes('outlook.com') || domain.includes('office365.com') || domain.includes('microsoft.com')) {\n      calendarSystem = 'outlook';\n    }\n    // Google domains → Google Calendar\n    else if (domain.includes('gmail.com') || domain.includes('google.com')) {\n      calendarSystem = 'google';\n    }\n  }\n  \n  // Override with environment preference if set\n  if (process.env.PREFERRED_CALENDAR_SYSTEM) {\n    calendarSystem = process.env.PREFERRED_CALENDAR_SYSTEM.toLowerCase();\n  }\n  \n  const routedData = {\n    ...data,\n    routing: {\n      targetSystem: calendarSystem,\n      routedAt: new Date().toISOString(),\n      routingReason: `Based on attendee domain or system preference`\n    },\n    stage: 'routed',\n    processedAt: new Date().toISOString()\n  };\n  \n  results.push({ json: routedData });\n}\n\nreturn results;"
+            },
+            "id": "code-route-calendar",
+            "name": "Route to Calendar System",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{$json.routing.targetSystem}}",
+                            "value2": "google"
+                        }
+                    ]
+                }
+            },
+            "id": "if-google",
+            "name": "Google Calendar?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "authentication": "oAuth2",
+                "resource": "event",
+                "operation": "create",
+                "calendarId": "primary",
+                "start": "={{$json.normalized.startTime}}",
+                "end": "={{$json.normalized.endTime}}",
+                "summary": "={{$json.normalized.title}}",
+                "description": "={{$json.normalized.description}}",
+                "location": "={{$json.normalized.location}}",
+                "additionalFields": {
+                    "attendees": "={{$json.normalized.attendees.map(email => ({email}))}}",
+                    "reminders": {
+                        "useDefault": false,
+                        "overrides": "={{$json.normalized.reminders}}"
+                    },
+                    "sendUpdates": "all"
+                }
+            },
+            "id": "google-create-event",
+            "name": "Create Google Calendar Event",
+            "type": "n8n-nodes-base.googleCalendar",
+            "typeVersion": 3,
+            "position": [
+                850,
+                200
+            ],
+            "credentials": {
+                "googleCalendarOAuth2Api": {
+                    "id": "google-calendar-oauth",
+                    "name": "Google Calendar OAuth2"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "authentication": "oAuth2",
+                "resource": "event",
+                "operation": "create",
+                "calendarId": "primary",
+                "subject": "={{$json.normalized.title}}",
+                "start": "={{$json.normalized.startTime}}",
+                "end": "={{$json.normalized.endTime}}",
+                "additionalFields": {
+                    "bodyContent": "={{$json.normalized.description}}",
+                    "location": "={{$json.normalized.location}}",
+                    "attendees": "={{$json.normalized.attendees.map(email => ({emailAddress: {address: email}}))}}",
+                    "isReminderOn": true
+                }
+            },
+            "id": "outlook-create-event",
+            "name": "Create Outlook Event",
+            "type": "n8n-nodes-base.microsoftOutlook",
+            "typeVersion": 2,
+            "position": [
+                850,
+                400
+            ],
+            "credentials": {
+                "microsoftOutlookOAuth2Api": {
+                    "id": "outlook-oauth",
+                    "name": "Microsoft Outlook OAuth2"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Format successful export result\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const eventData = item.json;\n  const originalData = item.json; // Contains the routing data\n  \n  const exported = {\n    ...originalData,\n    export: {\n      success: true,\n      calendarSystem: originalData.routing?.targetSystem || 'google',\n      eventId: eventData.id || eventData.iCalUID,\n      eventUrl: eventData.htmlLink || eventData.webLink,\n      eventCreatedAt: new Date().toISOString(),\n      attendeesNotified: true\n    },\n    stage: 'exported',\n    processedAt: new Date().toISOString()\n  };\n  \n  results.push({ json: exported });\n}\n\nreturn results;"
+            },
+            "id": "code-format-export",
+            "name": "Format Export Result",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1050,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "export-data",
+                            "name": "exportedData",
+                            "value": "={{$json}}",
+                            "type": "object"
+                        },
+                        {
+                            "id": "next-workflow-notify",
+                            "name": "nextWorkflow",
+                            "value": "06_notify",
+                            "type": "string"
+                        },
+                        {
+                            "id": "notification-type-success",
+                            "name": "notificationType",
+                            "value": "event_created",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-export-output",
+            "name": "Set Export Output",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.2,
+            "position": [
+                1250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "workflowId": "={{$env.WORKFLOW_ID_NOTIFY}}",
+                "options": {
+                    "waitForSubWorkflow": false
+                }
+            },
+            "id": "execute-notify",
+            "name": "Trigger Notification",
+            "type": "n8n-nodes-base.executeWorkflow",
+            "typeVersion": 1,
+            "position": [
+                1450,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "When called by another workflow": {
+            "main": [
+                [
+                    {
+                        "node": "Route to Calendar System",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Route to Calendar System": {
+            "main": [
+                [
+                    {
+                        "node": "Google Calendar?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Calendar?": {
+            "main": [
+                [
+                    {
+                        "node": "Create Google Calendar Event",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Create Outlook Event",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Google Calendar Event": {
+            "main": [
+                [
+                    {
+                        "node": "Format Export Result",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Outlook Event": {
+            "main": [
+                [
+                    {
+                        "node": "Format Export Result",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Export Result": {
+            "main": [
+                [
+                    {
+                        "node": "Set Export Output",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Set Export Output": {
+            "main": [
+                [
+                    {
+                        "node": "Trigger Notification",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "saveExecutionProgress": true,
+        "saveDataErrorExecution": "all",
+        "saveDataSuccessExecution": "all"
+    },
+    "staticData": null,
+    "tags": [
+        {
+            "name": "scheduling-assistant",
+            "id": "scheduling-tag-001"
+        },
+        {
+            "name": "calendar-export",
+            "id": "export-tag-001"
+        }
+    ],
+    "triggerCount": 0,
+    "updatedAt": "2026-01-19T20:02:35.000Z",
+    "versionId": "v1.0.0"
+}

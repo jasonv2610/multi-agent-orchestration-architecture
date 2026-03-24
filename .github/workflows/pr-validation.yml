@@ -1,0 +1,16 @@
+name: PR Validation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
+jobs:
+  validate:
+    uses: jasonv2610/jvi-core/.github/workflows/reusable-pr-validation.yml@main
+    secrets: inherit

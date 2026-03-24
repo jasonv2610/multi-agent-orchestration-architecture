@@ -1,0 +1,22 @@
+{
+    "agent": "scheduling_assistant",
+    "role": "Extract scheduling data, validate events, detect conflicts, route to calendars",
+    "version": "v1.1.0",
+    "entrypoint_order": [
+        "01_intake.json",
+        "02_extract_normalize.json",
+        "03_validate.json",
+        "04_conflict_scan.json",
+        "05_route_export.json",
+        "06_notify.json"
+    ],
+    "workflow_exports_path": "workflows/",
+    "schemas": [
+        "specs/event_payload.schema.json"
+    ],
+    "rules": {
+        "one_event_one_responsibility": true,
+        "never_infer_missing_data": true,
+        "explicit_conflict_notice_required": true
+    }
+}

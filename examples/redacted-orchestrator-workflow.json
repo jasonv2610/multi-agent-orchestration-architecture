@@ -1,0 +1,191 @@
+{
+  "_description": "Sanitized structural example of the master orchestrator workflow. Node parameters, IDs, credentials, routing rules, and prompt logic are redacted. Node sequence and role annotations reflect actual architectural structure.",
+  "name": "Master Orchestrator:Redacted Example",
+  "version": "2.x",
+
+  "nodes": [
+    {
+      "id": "<REDACTED>",
+      "type": "multi-channel-trigger",
+      "role": "Entry point. Receives inputs from all configured channels (text message, voice attachment, image, MCP tool call). Normalizes channel metadata before passing to next node.",
+      "parameters": "<REDACTED>",
+      "outputs": {
+        "input_type": "text | voice | image | mcp",
+        "raw_payload": "<REDACTED>",
+        "source_channel": "<REDACTED>"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "input-normalizer",
+      "role": "Converts all input types to a uniform text payload before classification. Voice inputs are routed through speech-to-text transcription. Images are routed through vision extraction. Text and MCP inputs pass through directly. Output of this node is always plain text regardless of source channel.",
+      "parameters": {
+        "voice_handler": "<REDACTED:STT service ref>",
+        "image_handler": "<REDACTED:vision extraction ref>",
+        "text_passthrough": true
+      },
+      "outputs": {
+        "normalized_text": "string",
+        "original_input_type": "text | voice | image | mcp"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "shortcode-matcher",
+      "role": "Attempts deterministic pattern match against the shortcode registry before any LLM call. If the input matches a known shortcode pattern, the matched agent target and extracted parameters are returned directly. LLM classification is skipped entirely for matched inputs. Shortcode patterns are loaded from the routing registry at session initialization.",
+      "parameters": {
+        "routing_registry_ref": "<REDACTED>",
+        "match_strategy": "prefix | regex | exact:policy-configured per pattern"
+      },
+      "outputs": {
+        "matched": "boolean",
+        "target_agent": "string or null",
+        "extracted_parameters": "object or null",
+        "shortcode_id": "string or null"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "routing-branch",
+      "role": "Conditional branch. If shortcode-matcher returned matched=true, routes directly to registry-lookup node, bypassing LLM classification. If matched=false, routes to LLM intent classifier.",
+      "parameters": {
+        "condition": "shortcode_matcher.matched === true"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "llm-intent-classifier",
+      "role": "Classifies unmatched inputs using LLM routing. Returns target agent, confidence score, and extracted structured parameters. Only reached when shortcode matching fails. Model and prompt template are redacted.",
+      "parameters": {
+        "model": "<REDACTED>",
+        "prompt_template": "<REDACTED>",
+        "output_schema": {
+          "target_agent": "string:one of the declared domain agent identifiers",
+          "confidence": "float 0.0–1.0",
+          "parameters": "object:extracted structured fields from input",
+          "intent_label": "string:human-readable classification label"
+        }
+      },
+      "outputs": {
+        "target_agent": "string",
+        "confidence": "float",
+        "parameters": "object",
+        "intent_label": "string"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "confidence-gate",
+      "role": "Evaluates the LLM classifier's confidence score against the configured routing threshold. If confidence meets or exceeds threshold, passes through to registry lookup. If below threshold, routes to clarification-responder. Threshold value is declared in the routing policy.",
+      "parameters": {
+        "threshold": "<REDACTED:routing policy value>",
+        "below_threshold_route": "clarification-responder"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "clarification-responder",
+      "role": "Reached when confidence gate triggers. Generates a clarification request returned to the user. Does not dispatch to any agent. Clarification text is generated based on the partial intent classification to give the user specific guidance rather than a generic 'I didn't understand' response.",
+      "parameters": {
+        "clarification_template": "<REDACTED>",
+        "include_partial_intent": true
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "registry-lookup",
+      "role": "Resolves the target agent identifier to an executable workflow reference using the routing registry. This indirection ensures the orchestrator never contains hardcoded agent endpoint references. Adding a new agent or changing an agent's location requires a registry update only.",
+      "parameters": {
+        "registry_partition": "routing_registry",
+        "lookup_key": "target_agent value from shortcode-matcher or llm-intent-classifier"
+      },
+      "outputs": {
+        "agent_workflow_ref": "resolved workflow reference",
+        "agent_domain": "string"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "dispatch-payload-builder",
+      "role": "Constructs the structured dispatch payload that will be sent to the target agent. Assembles required contract fields from upstream node outputs. Attaches user context hash for cache scoping. Validates payload structure against the agent's declared input contract before dispatch.",
+      "parameters": {
+        "contract_validation": true,
+        "payload_fields": {
+          "intent": "from classifier or shortcode-matcher",
+          "parameters": "from classifier or shortcode-matcher",
+          "user_context_hash": "<REDACTED:scoping value>",
+          "cache_hint": "from routing policy default for this agent domain",
+          "source_channel": "from multi-channel-trigger"
+        }
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "agent-dispatcher",
+      "role": "Executes the resolved agent workflow with the validated dispatch payload. Waits for agent response. If the agent returns execution_status=failed, routes to error-router. If partial or success, passes response to response-handler.",
+      "parameters": {
+        "agent_ref": "from registry-lookup",
+        "timeout_ms": "<REDACTED:policy-defined>",
+        "on_timeout": "route to error-router"
+      },
+      "outputs": {
+        "response_text": "string",
+        "confidence": "float",
+        "execution_status": "success | partial | failed",
+        "data_written": "boolean",
+        "sources": "array or null",
+        "follow_up_suggested": "boolean"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "response-handler",
+      "role": "Formats the agent response for delivery to the user. Applies output formatting rules based on source channel (text formatting for text channels, TTS synthesis trigger for voice channels). Does not modify response content:formatting only.",
+      "parameters": {
+        "channel_format_rules": "<REDACTED>",
+        "tts_enabled_channels": ["voice"],
+        "tts_service_ref": "<REDACTED>"
+      }
+    },
+    {
+      "id": "<REDACTED>",
+      "type": "error-router",
+      "role": "Reached on agent execution failure or dispatcher timeout. Captures structured failure context and routes to the error handler workflow asynchronously. Returns an immediate failure acknowledgment to the user while recovery executes in the background. Does not wait for error handler completion.",
+      "parameters": {
+        "error_handler_ref": "<REDACTED>",
+        "async": true,
+        "user_failure_message_template": "<REDACTED>"
+      },
+      "failure_context_captured": [
+        "error_type",
+        "error_message",
+        "failed_node_type",
+        "agent_domain",
+        "input_payload_schema",
+        "execution_id"
+      ]
+    }
+  ],
+
+  "execution_order": [
+    "multi-channel-trigger",
+    "input-normalizer",
+    "shortcode-matcher",
+    "routing-branch → [shortcode hit: registry-lookup] | [no match: llm-intent-classifier]",
+    "llm-intent-classifier → confidence-gate → [above threshold: registry-lookup] | [below threshold: clarification-responder]",
+    "registry-lookup",
+    "dispatch-payload-builder",
+    "agent-dispatcher → [success/partial: response-handler] | [failed/timeout: error-router]",
+    "response-handler → deliver to user"
+  ],
+
+  "connections": "<REDACTED:execution order preserved in 'execution_order' field above>",
+
+  "design_notes": [
+    "Shortcode matching occurs before any LLM call. The LLM classifier is only invoked for inputs that do not match a known deterministic pattern.",
+    "Confidence gating is applied only to LLM-classified inputs. Shortcode-matched inputs are never gated:they are considered pre-validated.",
+    "The registry-lookup node is the single point where agent identity is resolved. The orchestrator holds no direct references to agent implementations.",
+    "The dispatch-payload-builder validates against the agent contract before dispatch. A payload that violates the contract is rejected here, not inside the agent.",
+    "Error routing is asynchronous. The user receives a failure acknowledgment immediately; recovery does not block the response path."
+  ]
+}
