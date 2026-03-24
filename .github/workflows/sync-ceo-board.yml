@@ -1,0 +1,72 @@
+name: JVI CEO Board Sync
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Compute git metrics
+        id: metrics
+        env:
+          GH_TOKEN: ${{ secrets.JVI_PAT || github.token }}
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          MSG=$(git log -1 --format='%s' | head -c 80 | tr -d "'\"\\")
+          DATE=$(git log -1 --format='%ci')
+          LAST_PUSH=$(date -u +"%Y-%m-%d")
+          DAYS=$(( ($(date +%s) - $(git log -1 --format='%ct')) / 86400 ))
+          FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | wc -l | tr -d ' ')
+          WEEK_COMMITS=$(git log --since='1 week ago' --oneline 2>/dev/null | wc -l | tr -d ' ')
+          OPEN_PRS=$(gh pr list --state open --json number --jq 'length' 2>/dev/null || echo "0")
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "msg=$MSG" >> $GITHUB_OUTPUT
+          echo "date=$DATE" >> $GITHUB_OUTPUT
+          echo "last_push=$LAST_PUSH" >> $GITHUB_OUTPUT
+          echo "days=$DAYS" >> $GITHUB_OUTPUT
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+          echo "week_commits=$WEEK_COMMITS" >> $GITHUB_OUTPUT
+          echo "open_prs=$OPEN_PRS" >> $GITHUB_OUTPUT
+          if [ "$DAYS" -le 7 ]; then HEALTH="green"
+          elif [ "$DAYS" -le 30 ]; then HEALTH="yellow"
+          else HEALTH="red"; fi
+          echo "health=$HEALTH" >> $GITHUB_OUTPUT
+
+      - name: Dispatch to CEO Board
+        env:
+          GH_TOKEN: ${{ secrets.JVI_PAT }}
+        run: |
+          gh api repos/jasonv2610/jvi-enterprise/dispatches \
+            --method POST \
+            --input - <<EOF
+          {
+            "event_type": "sync-repo-status",
+            "client_payload": {
+              "entity_id": "${{ github.event.repository.name }}",
+              "health": "${{ steps.metrics.outputs.health }}",
+              "last_push": "${{ steps.metrics.outputs.last_push }}",
+              "days_since": ${{ steps.metrics.outputs.days }},
+              "week_commits": ${{ steps.metrics.outputs.week_commits }},
+              "open_prs": ${{ steps.metrics.outputs.open_prs }},
+              "trigger": "github-push",
+              "machine": "GitHub-Actions",
+              "git": {
+                "sha": "${{ steps.metrics.outputs.sha }}",
+                "message": "${{ steps.metrics.outputs.msg }}",
+                "date": "${{ steps.metrics.outputs.date }}",
+                "branch": "${{ github.ref_name }}",
+                "files_changed": ${{ steps.metrics.outputs.files }}
+              }
+            }
+          }
+          EOF

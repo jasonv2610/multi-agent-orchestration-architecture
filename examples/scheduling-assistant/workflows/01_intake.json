@@ -1,0 +1,264 @@
+{
+    "name": "Scheduling Assistant - 01 Intake",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "scheduling/intake",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook-intake",
+            "name": "Webhook - Scheduling Request",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ],
+            "webhookId": "scheduling-intake-001"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Initial request validation and sanitization\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const body = item.json.body || item.json;\n  \n  // Extract and validate request fields\n  const requestData = {\n    requestId: `REQ-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,\n    timestamp: new Date().toISOString(),\n    rawRequest: body.request || body.rawRequest || '',\n    requestorEmail: body.requestor_email || body.requestorEmail || '',\n    meetingType: body.meeting_type || body.meetingType || 'general',\n    priority: body.priority || 'normal',\n    metadata: {\n      source: body.source || 'api',\n      userAgent: item.json.headers?.['user-agent'] || 'unknown',\n      ipAddress: item.json.headers?.['x-forwarded-for'] || 'unknown'\n    }\n  };\n  \n  // Basic validation\n  const errors = [];\n  \n  if (!requestData.rawRequest || requestData.rawRequest.trim() === '') {\n    errors.push('Missing or empty request text');\n  }\n  \n  if (!requestData.requestorEmail || !requestData.requestorEmail.includes('@')) {\n    errors.push('Invalid or missing requestor email');\n  }\n  \n  requestData.validation = {\n    isValid: errors.length === 0,\n    errors: errors,\n    stage: 'intake'\n  };\n  \n  requestData.status = errors.length === 0 ? 'validated' : 'rejected';\n  \n  results.push({\n    json: requestData\n  });\n}\n\nreturn results;"
+            },
+            "id": "code-validate-intake",
+            "name": "Validate & Sanitize Request",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{$json.status}}",
+                            "value2": "validated"
+                        }
+                    ]
+                }
+            },
+            "id": "if-valid-request",
+            "name": "Is Valid Request?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "queueItem",
+                            "name": "queuedRequest",
+                            "value": "={{$json}}",
+                            "type": "object"
+                        },
+                        {
+                            "id": "nextStage",
+                            "name": "nextWorkflow",
+                            "value": "02_extract_normalize",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-queue-data",
+            "name": "Queue for Processing",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.2,
+            "position": [
+                850,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "errorResponse",
+                            "name": "error",
+                            "value": "={{$json.validation.errors.join(', ')}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "statusField",
+                            "name": "status",
+                            "value": "rejected",
+                            "type": "string"
+                        },
+                        {
+                            "id": "requestIdField",
+                            "name": "requestId",
+                            "value": "={{$json.requestId}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-error-response",
+            "name": "Format Error Response",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.2,
+            "position": [
+                850,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{{\n  \"success\": true,\n  \"requestId\": $json.requestId,\n  \"status\": \"queued\",\n  \"message\": \"Scheduling request received and queued for processing\",\n  \"timestamp\": $json.timestamp\n}}}",
+                "options": {
+                    "responseCode": 202
+                }
+            },
+            "id": "webhook-response-success",
+            "name": "Success Response",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{{\n  \"success\": false,\n  \"requestId\": $json.requestId,\n  \"status\": \"rejected\",\n  \"error\": $json.error,\n  \"timestamp\": new Date().toISOString()\n}}}",
+                "options": {
+                    "responseCode": 400
+                }
+            },
+            "id": "webhook-response-error",
+            "name": "Error Response",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "workflowId": "={{$env.WORKFLOW_ID_EXTRACT_NORMALIZE}}",
+                "options": {
+                    "waitForSubWorkflow": false
+                }
+            },
+            "id": "execute-next-workflow",
+            "name": "Trigger Extract & Normalize",
+            "type": "n8n-nodes-base.executeWorkflow",
+            "typeVersion": 1,
+            "position": [
+                1250,
+                200
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook - Scheduling Request": {
+            "main": [
+                [
+                    {
+                        "node": "Validate & Sanitize Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Validate & Sanitize Request": {
+            "main": [
+                [
+                    {
+                        "node": "Is Valid Request?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Valid Request?": {
+            "main": [
+                [
+                    {
+                        "node": "Queue for Processing",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Format Error Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Queue for Processing": {
+            "main": [
+                [
+                    {
+                        "node": "Success Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Error Response": {
+            "main": [
+                [
+                    {
+                        "node": "Error Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Success Response": {
+            "main": [
+                [
+                    {
+                        "node": "Trigger Extract & Normalize",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "saveExecutionProgress": true,
+        "saveDataErrorExecution": "all",
+        "saveDataSuccessExecution": "all"
+    },
+    "staticData": null,
+    "tags": [
+        {
+            "name": "scheduling-assistant",
+            "id": "scheduling-tag-001"
+        },
+        {
+            "name": "intake",
+            "id": "intake-tag-001"
+        }
+    ],
+    "triggerCount": 1,
+    "updatedAt": "2026-01-19T19:59:10.000Z",
+    "versionId": "v1.0.0"
+}

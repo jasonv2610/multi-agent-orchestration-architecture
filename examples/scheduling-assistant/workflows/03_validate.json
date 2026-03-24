@@ -1,0 +1,229 @@
+{
+    "name": "Scheduling Assistant - 03 Validate",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "workflow-trigger",
+            "name": "When called by another workflow",
+            "type": "n8n-nodes-base.executeWorkflowTrigger",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Business logic validation\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json.schedulingData || item.json;\n  const normalized = data.normalized;\n  \n  const errors = [];\n  const warnings = [];\n  \n  // Validate date/time is in the future\n  const now = new Date();\n  const startTime = new Date(normalized.startTime);\n  \n  if (startTime <= now) {\n    errors.push('Meeting time must be in the future');\n  }\n  \n  // Validate working hours (9 AM - 5 PM by default)\n  const workingHoursStart = parseInt(process.env.WORKING_HOURS_START?.split(':')[0] || '9');\n  const workingHoursEnd = parseInt(process.env.WORKING_HOURS_END?.split(':')[0] || '17');\n  const meetingHour = startTime.getHours();\n  \n  if (meetingHour < workingHoursStart || meetingHour >= workingHoursEnd) {\n    warnings.push(`Meeting scheduled outside working hours (${workingHoursStart}:00 - ${workingHoursEnd}:00)`);\n  }\n  \n  // Validate weekend\n  const dayOfWeek = startTime.getDay();\n  if (dayOfWeek === 0 || dayOfWeek === 6) {\n    warnings.push('Meeting scheduled on weekend');\n  }\n  \n  // Validate duration\n  if (normalized.duration < 15) {\n    errors.push('Meeting duration must be at least 15 minutes');\n  }\n  if (normalized.duration > 480) {\n    errors.push('Meeting duration cannot exceed 8 hours');\n  }\n  \n  // Validate attendees\n  if (normalized.attendees.length === 0) {\n    errors.push('At least one attendee is required');\n  }\n  if (normalized.attendees.length > 50) {\n    warnings.push('Large number of attendees may impact scheduling');\n  }\n  \n  // Validate meeting not too far in future (1 year max)\n  const oneYearFromNow = new Date();\n  oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);\n  if (startTime > oneYearFromNow) {\n    warnings.push('Meeting scheduled more than 1 year in advance');\n  }\n  \n  // Check lead time (at least 1 hour notice by default)\n  const minLeadTimeMinutes = parseInt(process.env.MIN_LEAD_TIME_MINUTES || '60');\n  const leadTimeMs = startTime - now;\n  const leadTimeMinutes = leadTimeMs / (1000 * 60);\n  \n  if (leadTimeMinutes < minLeadTimeMinutes) {\n    warnings.push(`Short notice: less than ${minLeadTimeMinutes} minutes lead time`);\n  }\n  \n  const validated = {\n    ...data,\n    validation: {\n      isValid: errors.length === 0,\n      errors: errors,\n      warnings: warnings,\n      validatedAt: new Date().toISOString(),\n      checks: {\n        futureDate: startTime > now,\n        workingHours: meetingHour >= workingHoursStart && meetingHour < workingHoursEnd,\n        validDuration: normalized.duration >= 15 && normalized.duration <= 480,\n        hasAttendees: normalized.attendees.length > 0,\n        adequateLeadTime: leadTimeMinutes >= minLeadTimeMinutes\n      }\n    },\n    stage: 'validated',\n    processedAt: new Date().toISOString()\n  };\n  \n  results.push({ json: validated });\n}\n\nreturn results;"
+            },
+            "id": "code-validate",
+            "name": "Business Logic Validation",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{$json.validation.isValid}}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "id": "if-valid",
+            "name": "Is Valid?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "valid-data",
+                            "name": "validatedData",
+                            "value": "={{$json}}",
+                            "type": "object"
+                        },
+                        {
+                            "id": "next-workflow",
+                            "name": "nextWorkflow",
+                            "value": "04_conflict_scan",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-valid-output",
+            "name": "Set Valid Output",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.2,
+            "position": [
+                850,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "invalid-data",
+                            "name": "invalidData",
+                            "value": "={{$json}}",
+                            "type": "object"
+                        },
+                        {
+                            "id": "next-workflow-reject",
+                            "name": "nextWorkflow",
+                            "value": "06_notify",
+                            "type": "string"
+                        },
+                        {
+                            "id": "notification-type",
+                            "name": "notificationType",
+                            "value": "validation_failed",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-invalid-output",
+            "name": "Set Invalid Output",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.2,
+            "position": [
+                850,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "workflowId": "={{$env.WORKFLOW_ID_CONFLICT_SCAN}}",
+                "options": {
+                    "waitForSubWorkflow": false
+                }
+            },
+            "id": "execute-conflict-scan",
+            "name": "Trigger Conflict Scan",
+            "type": "n8n-nodes-base.executeWorkflow",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "workflowId": "={{$env.WORKFLOW_ID_NOTIFY}}",
+                "options": {
+                    "waitForSubWorkflow": false
+                }
+            },
+            "id": "execute-notify-failure",
+            "name": "Notify Validation Failure",
+            "type": "n8n-nodes-base.executeWorkflow",
+            "typeVersion": 1,
+            "position": [
+                1050,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "When called by another workflow": {
+            "main": [
+                [
+                    {
+                        "node": "Business Logic Validation",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Business Logic Validation": {
+            "main": [
+                [
+                    {
+                        "node": "Is Valid?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Valid?": {
+            "main": [
+                [
+                    {
+                        "node": "Set Valid Output",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Set Invalid Output",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Set Valid Output": {
+            "main": [
+                [
+                    {
+                        "node": "Trigger Conflict Scan",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Set Invalid Output": {
+            "main": [
+                [
+                    {
+                        "node": "Notify Validation Failure",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "saveExecutionProgress": true,
+        "saveDataErrorExecution": "all",
+        "saveDataSuccessExecution": "all"
+    },
+    "staticData": null,
+    "tags": [
+        {
+            "name": "scheduling-assistant",
+            "id": "scheduling-tag-001"
+        },
+        {
+            "name": "validation",
+            "id": "validation-tag-001"
+        }
+    ],
+    "triggerCount": 0,
+    "updatedAt": "2026-01-19T19:59:10.000Z",
+    "versionId": "v1.0.0"
+}
