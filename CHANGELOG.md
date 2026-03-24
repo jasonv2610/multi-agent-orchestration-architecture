@@ -5,14 +5,14 @@ All notable changes to this repository are documented here.
 ---
 
 ## v2.3.0 (2026-03-02)
-
+Refined public system presentation and removed internal-only artifacts.
 ### Removed
-- `CLAUDE.md`: Internal AI operating instructions. Not appropriate for a public portfolio repo. Repo conventions and design decisions remain in `README.md` and `IMPLEMENTATION_GUIDE.md`.
+- CLAUDE.md: Removed internal AI operating instructions. Public repository reflects architecture and design patterns only.
 
 ---
 
 ## v2.2.0 (2026-01-19)
-
+Expanded system tooling, validation layer, and deployment documentation.
 ### Added
 - `package.json`: Dev dependency manifest with `ajv`, `ajv-formats`, `semver`, `jest`, and `husky`. Includes npm scripts for `test`, `test:contract`, `test:schema`, `test:policy`, `validate`, and `prepare`.
 - `.nvmrc`: Node.js version pin (20)
@@ -42,7 +42,7 @@ All notable changes to this repository are documented here.
 ---
 
 ## v2.1.0 (2026-01-15)
-
+Introduced full scheduling pipeline and schema-driven architecture.
 ### Added
 - `examples/scheduling-assistant/`: Complete 6-stage scheduling sub-pipeline with importable n8n workflow files
 - `examples/scheduling-assistant/specs/event_payload.schema.json`: Shared JSON Schema for all pipeline stages
@@ -54,7 +54,7 @@ All notable changes to this repository are documented here.
 ---
 
 ## v2.0.0 (2026-01-10)
-
+Established registry-driven architecture, governance layer, and observability design.
 ### Added
 - `registry-pattern/`: Registry-as-SSOT pattern documentation and sanitized example
 - `governance/`: Agent contracts overview and routing/caching policy summary
@@ -69,7 +69,7 @@ All notable changes to this repository are documented here.
 ---
 
 ## v1.0.0 (2025-12-01)
-
+Initial system architecture and foundational components.
 ### Added
 - Initial repository structure
 - `architecture/overview.md`: Core architecture overview
