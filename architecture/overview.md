@@ -22,6 +22,7 @@ This pattern isolates domain logic behind clear input/output contracts, so each 
 
 Each domain agent handles one bounded context:
 
+<<<<<<< HEAD
 | Domain | Bounded Context |
 |---|---|
 | Productivity | Task management, calendar, email |
@@ -30,6 +31,16 @@ Each domain agent handles one bounded context:
 | Growth | Learning tracking, career logging |
 | Intelligence | Research queries, knowledge base retrieval |
 | Document | Document generation and processing |
+=======
+| Domain        | Bounded Context                            |
+|---------------|--------------------------------------------|
+| Productivity  | Task management, calendar, email           |
+| Finance       | Expense tracking, receipt processing       |
+| Operations    | Inventory management, operational logging  |
+| Growth        | Learning tracking, career logging          |
+| Intelligence  | Research queries, knowledge base retrieval |
+| Document      | Document generation and processing         |
+>>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 Agents do not communicate with each other. All inter-domain coordination flows through the orchestrator.
 
@@ -64,6 +75,7 @@ The same routing and agent layer handles voice and text uniformly after transcri
 
 Responses are cached across the orchestration layer by TTL class. Five TTL classes map to data volatility:
 
+<<<<<<< HEAD
 | Class | Duration | Applied To |
 |---|---|---|
 | No-cache | 0 | Real-time data |
@@ -71,6 +83,15 @@ Responses are cached across the orchestration layer by TTL class. Five TTL class
 | Medium | Hours | General queries |
 | Long | Days | Research and analysis |
 | Reference | Week | Stable definitions |
+=======
+| Class      | Duration  | Applied To             |
+|------------|-----------|------------------------|
+| No-cache   | 0         | Real-time data         |
+| Short      | Minutes   | High-frequency status  |
+| Medium     | Hours     | General queries        |
+| Long       | Days      | Research and analysis  |
+| Reference  | 1 Week    | Stable definitions     |
+>>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 Cache keys are scoped by agent, user context, and a hash of the query parameters.
 
@@ -80,7 +101,11 @@ Cache keys are scoped by agent, user context, and a hash of the query parameters
 
 - **No direct agent-to-agent calls:** This prevents hidden coupling and makes routing auditable.
 - **Shortcode bypass:** Deterministic routing for known high-frequency commands avoids unnecessary LLM calls.
+<<<<<<< HEAD
 - **Registry-resolved configuration:** No data store IDs, API endpoints, or routing rules are hardcoded in workflow logic (see `registry-pattern/`).
+=======
+- **Registry-resolved configuration:** No data store IDs, API endpoints, or routing rules are hardcoded in workflow logic .
+>>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 - **Spec-defined contracts:** Each agent's input/output shape is declared in a schema. Violations are caught at validation time, not runtime.
 
 ---
