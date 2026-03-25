@@ -1,22 +1,12 @@
-<<<<<<< HEAD
-# Setup Guide
-=======
 # System Setup and Deployment Guide
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 This document covers the tools used in this project and how to configure them for local use or to run the scheduling assistant pipeline against a live n8n instance.
 
 ---
 
-<<<<<<< HEAD
-## Tools Used
-
-These are the external services and credentials used directly by the 6 scheduling assistant workflow files in this repository.
-=======
 ## System Dependencies
 
 External services and credentials required by the 6-stage scheduling pipeline.
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 ### Runtime
 
@@ -28,11 +18,7 @@ External services and credentials required by the 6-stage scheduling pipeline.
 | Notification channel | Stage 06 | Dispatches confirmation, conflict alert, or failure message to the requestor. **Configurable:** the delivery node is disabled by default. Replace it with Telegram, a webhook, or any messaging integration your system uses. | Depends on channel |
 | PostgreSQL | Stage 06 | Persists scheduling logs to a database table. **Disabled by default.** Enable the node in stage 06 only if you need persistent logs. | Postgres |
 
-<<<<<<< HEAD
-### Developer Interface
-=======
 ### Developer Tooling
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 | Tool | Role | Where to Get |
 |------|------|--------------|
@@ -271,11 +257,7 @@ Monitor execution progress in n8n: **Executions** tab for each workflow stage.
 
 ---
 
-<<<<<<< HEAD
-## Developer Tooling (Pre-commit Hook + Tests)
-=======
 ## Validation and Testing Layer
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 The pre-commit contract validator and test suite require Node.js 20+ and npm.
 
@@ -324,11 +306,7 @@ nvm use   # reads .nvmrc and switches to Node 20
 
 ---
 
-<<<<<<< HEAD
-## Claude Code + MCP (Developer Interface)
-=======
 ## Developer Interface: Claude Code and MCP
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 To manage n8n workflows directly from Claude Code:
 

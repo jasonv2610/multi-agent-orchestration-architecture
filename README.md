@@ -1,14 +1,6 @@
 # Multi-Agent Orchestration Architecture
 
 [![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC_BY--NC--ND_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
-<<<<<<< HEAD
-
-A contract-first, registry-driven multi-agent orchestration architecture deployed on n8n Cloud. The system routes structured and unstructured inputs across specialized domain agents using deterministic routing and confidence-governed intent classification.
-
-Built for engineers designing production multi-agent systems who want architectural patterns beyond single-workflow tutorials: registry-based configuration, formal agent contracts, and autonomous error recovery.
-
-The production system this showcase is derived from runs on n8n Cloud and handles live operational workflows across multiple domain agents.
-=======
 ![Status](https://img.shields.io/badge/Status-Production_Architecture-6d8b74?style=flat-square&labelColor=1a1a2e)
 ![Validation](https://img.shields.io/badge/Validation-Private_Pipeline-6d8b74?style=flat-square&labelColor=1a1a2e)
 ![Type](https://img.shields.io/badge/Type-Production_Architecture-6d8b74?style=flat-square&labelColor=1a1a2e)
@@ -54,7 +46,6 @@ Built for engineers who want production-grade patterns: registry-based configura
 4. Operations Agent is invoked with the extracted item identifier
 5. Agent updates the inventory data store with availability status and timestamp
 6. Confirmation is synthesized to audio and returned as a voice reply
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 ## Architecture Overview
 
@@ -62,48 +53,17 @@ A central orchestrator receives input from multiple channels, text, voice, and i
 
 Agents operate independently against dedicated data stores and are bound by explicit input and output contracts. Execution failures are intercepted by a recovery layer that applies remediation patterns without direct human intervention.
 
-<<<<<<< HEAD
-| Attribute | Value |
-|------------|-------|
-| Runtime | n8n Cloud |
-| User Interface | Telegram |
-| Developer Interface | Claude Code via MCP |
-| Version | 2.2.0 |
-=======
 | Attribute            | Value                |
 |----------------------|----------------------|
 | Runtime              | n8n Cloud            |
 | User Interface       | Telegram             |
 | Developer Interface  | Claude Code via MCP  |
 | Version              | 1.0.0                |
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 
 ## System Layers
 
 ```
-<<<<<<< HEAD
-┌──────────────────────────────────────────────────┐
-│  Workflows                                       │
-│  Orchestration · Domain Agents · Error Handler   │
-│  Scheduling Pipeline · Helper Utilities          │
-├──────────────────────────────────────────────────┤
-│  Governance                                      │
-│  Agent Contracts · Routing Policy                │
-│  Caching Policy · Verification Policy            │
-│  Version Validation · Pre-commit Gates           │
-├──────────────────────────────────────────────────┤
-│  Registry (SSOT)                                 │
-│  Data Store References · Credential Identifiers  │
-│  Routing Rules · Cache Class Definitions         │
-├──────────────────────────────────────────────────┤
-│  Knowledge  ·········· (private)                 │
-│  Prompt Templates · n8n Standards · RAG Patterns │
-├──────────────────────────────────────────────────┤
-│  Operations  ········· (private)                 │
-│  Self-healing · Debugging Patterns · Audit Tools │
-└──────────────────────────────────────────────────┘
-=======
 +--------------------------------------------------+
 |  Layer 1: Workflows                              |
 |  Orchestration, Domain Agents, Error Handler     |
@@ -124,16 +84,11 @@ Agents operate independently against dedicated data stores and are bound by expl
 |  Layer 5: Operations  (private)                  |
 |  Self-healing, Debugging Patterns, Audit Tools   |
 +--------------------------------------------------+
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 ```
 
 ## Repository Structure
 
-<<<<<<< HEAD
-The system is organized into five logical layers. This public showcase includes architecture, governance, registry, and integration patterns. Internal operational documentation is private.
-=======
 The system is organized into five logical layers. This repository includes architecture documentation, governance tooling, and workflow examples. Internal operational documentation is private. Internal operational documentation is private.
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 **Architecture**
 Design documentation for each system component. Covers the orchestration pattern, domain agent model, scheduling sub-pipeline, error recovery model, integration layer, and observability design.
@@ -148,17 +103,6 @@ Design documentation for each system component. Covers the orchestration pattern
 **Governance**
 The contract and policy layer. Declares input/output schemas for each agent, routing policy, caching policy, verification thresholds, and versioning rules. A pre-commit validation gate checks contract compliance before any workflow change reaches the repository.
 
-<<<<<<< HEAD
-**Registry**
-The configuration SSOT layer. Centralizes all data store references, credential identifiers, routing rules, and cache class definitions. Workflows resolve identifiers at runtime from the registry. No environment-specific values are hard-coded into workflow logic.
-
-**Examples**
-Workflow examples ranging from redacted structural illustrations to a complete, importable pipeline implementation.
-
-- `examples/scheduling-assistant/`: Full 6-stage scheduling pipeline: actual n8n workflow exports, event payload schema, and manifest. Importable into any n8n instance.
-- `examples/redacted-orchestrator-workflow.json`: Master orchestrator routing structure with annotated node roles
-- `examples/redacted-error-handler.json`: Error handler node sequence: Path A catalog recovery, Path B AI-assisted repair, escalation
-=======
 **Examples**
 
 Two categories: one fully importable pipeline, and structural reference files showing architecture patterns.
@@ -182,7 +126,6 @@ See `examples/scheduling-assistant/README.md` for import steps and environment v
 
 - `examples/redacted-orchestrator-workflow.json`: Master orchestrator routing structure with annotated node roles
 - `examples/redacted-error-handler.json`: Error handler node sequence -- Path A catalog recovery, Path B AI-assisted repair, escalation
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 - `examples/redacted-agent-contract.yaml`: Domain agent input/output contract structure
 - `examples/redacted-workflow.json`: Domain agent workflow node structure
 
@@ -192,22 +135,7 @@ Interactive Python demos of core architectural patterns. Runnable without creden
 - `notebooks/routing-system-demo.ipynb`: End-to-end routing pipeline demo - Tier 1 shortcode matching, Tier 2 LLM classification simulation, confidence gate visualization, and 30-day routing distribution charts.
 
 **Documentation** *(private)*
-<<<<<<< HEAD
-Internal knowledge base, prompt templates, n8n execution standards, debugging patterns, and operational runbooks. Not included in this public showcase.
-
-## Execution Example
-
-**Input:** Voice message: "86 the salmon" (mark menu item as unavailable)
-
-1. Messaging interface receives the voice attachment and passes it to the orchestrator
-2. Orchestrator routes audio through a speech-to-text transcription node
-3. Transcript matches a deterministic shortcode pattern, so LLM classification is bypassed
-4. Operations Agent is invoked with the extracted item identifier
-5. Agent updates the inventory data store with availability status and timestamp
-6. Confirmation is synthesized to audio and returned as a voice reply
-=======
 Internal knowledge base, prompt templates, n8n execution standards, debugging patterns, and operational runbooks. Not included in this release.
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 ## Core Capabilities
 
@@ -221,11 +149,7 @@ Internal knowledge base, prompt templates, n8n execution standards, debugging pa
 
 ## Scope and Exclusions
 
-<<<<<<< HEAD
-This repository is a curated public showcase of architecture, workflow structure, and design patterns from a larger private system. The following are not included:
-=======
 This repository is a curated release of architecture, workflow structure, and design patterns from a larger private system. The following are not included:
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 - Proprietary prompt engineering and LLM routing logic
 - Production credentials and environment-specific configuration
@@ -234,8 +158,6 @@ This repository is a curated release of architecture, workflow structure, and de
 - Workflow implementations containing non-public business logic
 
 Published materials reflect architectural and structural decisions only. Functional reproduction requires environment configuration not available in this repository.
-<<<<<<< HEAD
-=======
 ## Architecture and Governance
 
 | Dimension | Implementation |
@@ -248,7 +170,6 @@ Published materials reflect architectural and structural decisions only. Functio
 | Telemetry | Structured events emitted at each routing, agent, cache, and error decision point |
 | Self-Healing | Autonomous Path A catalog recovery and Path B AI-assisted repair before escalation |
 | Contract Enforcement | Input/output schemas declared per agent; validated at commit time and runtime |
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 ## Design Principles
 

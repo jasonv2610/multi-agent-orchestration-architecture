@@ -1,31 +1,16 @@
-<<<<<<< HEAD
-# Implementation Guide
-
-This guide walks through how to apply the architecture patterns in this repository to build your own multi-agent orchestration system on n8n. It covers the recommended reading order, the decisions you need to make before building, the sequence in which to build each component, and a pre-launch checklist.
-=======
 # System Implementation Guide
 
 This guide covers how to apply the architecture patterns in this repository to build a production multi-agent orchestration system on n8n. It covers the recommended reading order, the decisions you need to make before building, the sequence in which to build each component, and a pre-launch checklist.
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 This is not a repeat of [SETUP.md](SETUP.md). SETUP.md covers running the scheduling assistant example. This guide covers adapting the full architecture to your own domain.
 
 ---
 
-<<<<<<< HEAD
-## Who This Guide Is For
-
-- You have read the README and understand the hub-and-spoke orchestration model
-- You want to build a production system using these patterns, not just run the example
-- You are comfortable with n8n workflow building at an intermediate level
-- You have identified a real operational domain to automate
-=======
 ## Prerequisites
 
 - Familiarity with the hub-and-spoke orchestration model (see README)
 - n8n workflow building experience at an intermediate or above level
 - Defined operational domain to automate
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 ---
 
@@ -40,11 +25,7 @@ Before building anything, read these documents in this sequence. Each one builds
 | 3 | `architecture/diagrams/agent-topology.md` | Visual flow: primary path, error path, scheduling sub-pipeline |
 | 4 | `governance/contracts-overview.md` | How agent contracts work and why they exist |
 | 5 | `governance/policy-summary.md` | Routing, caching, verification, and versioning policies |
-<<<<<<< HEAD
-| 6 | `registry-pattern/ssot-pattern.md` | Why configuration is centralized and how the registry works |
-=======
 | 6 | `governance/policy-summary.md` (registry section) | Why configuration is centralized and how the registry works |
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 | 7 | `examples/redacted-agent-contract.yaml` | Concrete contract structure before you write your own |
 | 8 | `examples/redacted-orchestrator-workflow.json` | Orchestrator node anatomy with role annotations |
 | 9 | `examples/redacted-workflow.json` | Domain agent workflow structure |
