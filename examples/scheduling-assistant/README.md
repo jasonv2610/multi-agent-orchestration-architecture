@@ -1,12 +1,6 @@
-<<<<<<< HEAD
-# Scheduling Assistant
-
-A scheduling workflow system that processes scheduling requests, validates availability, detects conflicts, and manages calendar integrations.
-=======
 # Scheduling Assistant Pipeline
 
 Six-stage autonomous scheduling pipeline. Processes natural language requests end-to-end: intake, normalization, validation, conflict detection, calendar write, and confirmation delivery.
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 ## Purpose
 
@@ -66,17 +60,6 @@ scheduling-assistant/
     └── 06_notify.json
 ```
 
-<<<<<<< HEAD
-## Getting Started
-
-### Prerequisites
-- n8n instance (v1.0+)
-- Calendar API credentials (Google Calendar, Outlook, or both)
-- SMTP credentials for email notifications
-- PostgreSQL database (optional, for persistent logging)
-
-### Installation
-=======
 ## Deployment
 
 ### System Requirements
@@ -86,7 +69,6 @@ scheduling-assistant/
 - PostgreSQL (optional -- for persistent execution logs)
 
 ### Import and Credential Provisioning
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 1. **Import Workflows**: Use the n8n UI: Settings → Import from File. Import all 6 workflows in order.
 
@@ -188,11 +170,7 @@ See `specs/event_payload.schema.json` for the full JSON Schema definition.
 
 Enable debug logging: `N8N_LOG_LEVEL=debug`
 
-<<<<<<< HEAD
-## Version History
-=======
 ## Release History
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 ### v1 (Current)
 - 6-stage pipeline
@@ -201,15 +179,6 @@ Enable debug logging: `N8N_LOG_LEVEL=debug`
 - NLP-based date/time extraction
 - Conflict detection with alternative suggestions
 
-<<<<<<< HEAD
-### Planned (v2)
-- AI-powered smart scheduling
-- Multi-timezone support
-- Recurring meeting automation
-- Video conferencing platform integration
-
-=======
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 ---
 
 **Version:** 1.0.0 | **Part of:** Multi-Agent Orchestration Architecture

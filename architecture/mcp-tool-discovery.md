@@ -1,10 +1,6 @@
 # Centralized MCP Tool Discovery
 
-<<<<<<< HEAD
-**Status:** Design | **Version:** 1.0 | **Date:** 2026-03-10
-=======
 **Status:** Planned -- Phase 1 Design | **Version:** 1.0 | **Date:** 2026-03-10
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 **Related:** SOVEREIGN (JVI-CEO-028), multi-agent evidence validation
 
 ---

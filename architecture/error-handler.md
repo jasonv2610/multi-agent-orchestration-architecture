@@ -35,19 +35,11 @@ escalation_policy: "log_and_notify | immediate_escalation | silent_log"
 
 ### Error Classes
 
-<<<<<<< HEAD
-| Class | Behavior | Examples |
-|-------|----------|---------|
-| **Transient** | Retry eligible. Condition is expected to self-resolve. | Integration timeout, momentary data store unavailability, rate limit hit |
-| **Permanent** | Not retry eligible. Condition will not change on retry. | Malformed input payload, invalid registry key reference, contract schema violation |
-| **Recoverable** | Requires a fix before retry. Condition can be resolved with a targeted correction. | Stale registry reference, deprecated workflow node type, auth credential rotation needed |
-=======
 | Class        | Behavior                                                      | Examples                                                           |
 |--------------|---------------------------------------------------------------|--------------------------------------------------------------------|
 | Transient    | Retry eligible. Condition expected to self-resolve.           | Integration timeout, data store unavailability, rate limit hit     |
 | Permanent    | Not retry eligible. Condition will not change on retry.       | Malformed input payload, invalid registry key, contract violation  |
 | Recoverable  | Requires a fix before retry. Can be resolved with correction. | Stale registry reference, deprecated node type, credential rotation |
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 ### Example Catalog Entries (Structural, Values Redacted)
 
@@ -126,15 +118,6 @@ Validate fix against agent contract
 
 **Fix pattern types (structural examples):**
 
-<<<<<<< HEAD
-| Pattern ID | Behavior |
-|------------|---------|
-| `retry_with_backoff` | Wait a configured delay, then re-attempt the failed operation unchanged |
-| `registry_key_repair` | Look up the undefined key in a fallback registry partition; if found, substitute and re-execute |
-| `credential_refresh` | Trigger a credential refresh via the engine's credential manager, then re-execute |
-| `cache_bypass` | Mark the specific cache key as invalid, force a fresh execution, repopulate cache |
-| `payload_sanitize` | Apply a declared sanitization transform to the input payload before re-execution |
-=======
 | Pattern ID              | Behavior                                                                        |
 |-------------------------|---------------------------------------------------------------------------------|
 | `retry_with_backoff`   | Wait a configured delay, then re-attempt the failed operation unchanged         |
@@ -142,7 +125,6 @@ Validate fix against agent contract
 | `credential_refresh`   | Trigger credential refresh via the engine credential manager, then re-execute   |
 | `cache_bypass`         | Mark cache key invalid, force fresh execution, repopulate cache                 |
 | `payload_sanitize`     | Apply declared sanitization transform to input payload before re-execution      |
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
 
 ---
 

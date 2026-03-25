@@ -1,13 +1,7 @@
 {
   "name": "multi-agent-orchestration-architecture",
-<<<<<<< HEAD
-  "version": "2.2.0",
-  "description": "Contract-first, registry-driven multi-agent orchestration architecture on n8n Cloud",
-  "private": true,
-=======
   "version": "1.0.0",
   "description": "Contract-first, registry-driven multi-agent orchestration architecture on n8n Cloud",
->>>>>>> 421a0ce6258687ef4d2cea57badc917fb0f5eb8a
   "engines": {
     "node": ">=20.0.0"
   },
