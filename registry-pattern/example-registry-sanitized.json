@@ -1,0 +1,130 @@
+{
+  "_description": "Sanitized example showing registry structure. All IDs and values are placeholders.",
+  "_version": "2.x",
+
+  "data_stores": {
+    "operations_sheet": {
+      "type": "google_sheets",
+      "logical_name": "operations_sheet",
+      "id": "<REDACTED_SHEET_ID>",
+      "tabs": ["Inventory", "QuickLog", "ErrorLog"]
+    },
+    "finance_sheet": {
+      "type": "google_sheets",
+      "logical_name": "finance_sheet",
+      "id": "<REDACTED_SHEET_ID>",
+      "tabs": ["Expenses", "Categories"]
+    },
+    "knowledge_base": {
+      "type": "supabase",
+      "logical_name": "knowledge_base",
+      "table": "documents",
+      "match_function": "match_documents"
+    },
+    "response_cache": {
+      "type": "redis",
+      "logical_name": "response_cache",
+      "ttl_classes": ["no_cache", "short", "medium", "long", "reference"]
+    }
+  },
+
+  "file_storage": {
+    "receipts_folder": {
+      "type": "google_drive",
+      "logical_name": "receipts_folder",
+      "id": "<REDACTED_FOLDER_ID>"
+    },
+    "documents_folder": {
+      "type": "google_drive",
+      "logical_name": "documents_folder",
+      "id": "<REDACTED_FOLDER_ID>"
+    }
+  },
+
+  "credentials": {
+    "_note": "Credential logical names only. No secrets stored here.",
+    "google_workspace": "google-oauth2-credential",
+    "openai": "openai-api-credential",
+    "supabase": "supabase-api-credential",
+    "telegram": "telegram-bot-credential",
+    "elevenlabs": "elevenlabs-api-credential"
+  },
+
+  "cache_ttl_classes": {
+    "no_cache":  { "ttl_seconds": 0,      "use_case": "Real-time data" },
+    "short":     { "ttl_seconds": 300,    "use_case": "High-frequency status" },
+    "medium":    { "ttl_seconds": 3600,   "use_case": "General queries" },
+    "long":      { "ttl_seconds": 86400,  "use_case": "Research and analysis" },
+    "reference": { "ttl_seconds": 604800, "use_case": "Stable definitions" }
+  },
+
+  "cache_key_format": "system:{agent_id}:{user_context_hash}:{query_hash}",
+
+  "routing_registry": {
+    "_note": "Maps agent identifiers to workflow references. Workflow IDs are read from environment variables:no IDs are hardcoded here.",
+    "productivity": {
+      "agent_id": "productivity",
+      "workflow_id_ref": "$env.WORKFLOW_ID_PRODUCTIVITY",
+      "default_ttl_class": "medium",
+      "max_execution_ms": 8000
+    },
+    "finance": {
+      "agent_id": "finance",
+      "workflow_id_ref": "$env.WORKFLOW_ID_FINANCE",
+      "default_ttl_class": "long",
+      "max_execution_ms": 12000
+    },
+    "operations": {
+      "agent_id": "operations",
+      "workflow_id_ref": "$env.WORKFLOW_ID_OPERATIONS",
+      "default_ttl_class": "short",
+      "max_execution_ms": 6000
+    },
+    "intelligence": {
+      "agent_id": "intelligence",
+      "workflow_id_ref": "$env.WORKFLOW_ID_INTELLIGENCE",
+      "default_ttl_class": "long",
+      "max_execution_ms": 15000
+    }
+  },
+
+  "workflow_registry": {
+    "_note": "Sub-pipeline stage references. Stage IDs are resolved from environment at runtime.",
+    "scheduling_pipeline": {
+      "stages": [
+        { "stage": "intake",            "id_ref": "$env.WORKFLOW_ID_INTAKE" },
+        { "stage": "extract_normalize", "id_ref": "$env.WORKFLOW_ID_EXTRACT_NORMALIZE" },
+        { "stage": "validate",          "id_ref": "$env.WORKFLOW_ID_VALIDATE" },
+        { "stage": "conflict_scan",     "id_ref": "$env.WORKFLOW_ID_CONFLICT_SCAN" },
+        { "stage": "route_export",      "id_ref": "$env.WORKFLOW_ID_ROUTE_EXPORT" },
+        { "stage": "notify",            "id_ref": "$env.WORKFLOW_ID_NOTIFY" }
+      ]
+    }
+  },
+
+  "error_type_registry": {
+    "_note": "Classifies error types and declares retry eligibility and routing behavior.",
+    "VALIDATION_FAILURE": {
+      "retry_eligible": false,
+      "route_to": "error_handler",
+      "user_message_template": "Your request could not be processed:see errors below."
+    },
+    "AGENT_TIMEOUT": {
+      "retry_eligible": true,
+      "max_retries": 2,
+      "route_to": "error_handler",
+      "user_message_template": "The request took too long. Retrying automatically."
+    },
+    "DATA_STORE_WRITE_FAILURE": {
+      "retry_eligible": true,
+      "max_retries": 1,
+      "route_to": "error_handler",
+      "user_message_template": "A data storage error occurred. The team has been notified."
+    },
+    "LOW_CONFIDENCE": {
+      "retry_eligible": false,
+      "route_to": "clarification_responder",
+      "user_message_template": "I wasn't sure how to handle that. Could you clarify?"
+    }
+  }
+}
