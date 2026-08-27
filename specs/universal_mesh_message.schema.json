@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UniversalPodMeshMessage",
+  "description": "Standardized multi-tier message envelope for inter-pod agentic communication and human stakeholder interaction across the JVI Enterprise Ecosystem.",
+  "type": "object",
+  "required": [
+    "message_id",
+    "timestamp",
+    "sender_pod",
+    "sender_agent",
+    "target_pod",
+    "target_recipient",
+    "subject",
+    "semantic_content"
+  ],
+  "properties": {
+    "message_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sender_pod": {
+      "type": "string",
+      "enum": [
+        "Pod 1: Sovereign Orchestration",
+        "Pod 2: Core Engineering",
+        "Pod 3: Security & Governance",
+        "Pod 4: CFO & Financial Ops",
+        "Pod 5: Product & GTM Systems",
+        "Pod 6: Knowledge & Institutional Memory",
+        "External / Human Stakeholder"
+      ]
+    },
+    "sender_agent": {
+      "type": "string"
+    },
+    "target_pod": {
+      "type": "string",
+      "enum": [
+        "Pod 1: Sovereign Orchestration",
+        "Pod 2: Core Engineering",
+        "Pod 3: Security & Governance",
+        "Pod 4: CFO & Financial Ops",
+        "Pod 5: Product & GTM Systems",
+        "Pod 6: Knowledge & Institutional Memory",
+        "All Pods (Broadcast)",
+        "Human Stakeholder"
+      ]
+    },
+    "target_recipient": {
+      "type": "string"
+    },
+    "preferred_tier": {
+      "type": "string",
+      "enum": ["Tier 1: Non-Technical", "Tier 2: Intermediate", "Tier 3: Advanced/PhD", "All Tiers"],
+      "default": "All Tiers"
+    },
+    "subject": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "semantic_content": {
+      "type": "object",
+      "required": ["tier_1_operator", "tier_2_builder", "tier_3_architect"],
+      "properties": {
+        "tier_1_operator": {
+          "type": "object",
+          "required": ["summary", "business_impact", "action_required"],
+          "properties": {
+            "summary": { "type": "string" },
+            "business_impact": { "type": "string" },
+            "action_required": { "type": "string" }
+          }
+        },
+        "tier_2_builder": {
+          "type": "object",
+          "required": ["flow_summary", "components_involved", "configurations", "remediation_steps"],
+          "properties": {
+            "flow_summary": { "type": "string" },
+            "components_involved": { "type": "array", "items": { "type": "string" } },
+            "configurations": { "type": "object" },
+            "remediation_steps": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "tier_3_architect": {
+          "type": "object",
+          "required": ["mathematical_model", "complexity_bounds", "formal_invariants", "kernel_metrics"],
+          "properties": {
+            "mathematical_model": { "type": "string" },
+            "complexity_bounds": { "type": "string" },
+            "formal_invariants": { "type": "array", "items": { "type": "string" } },
+            "kernel_metrics": { "type": "object" }
+          }
+        }
+      }
+    },
+    "didactic_teaching_module": {
+      "type": "object",
+      "properties": {
+        "concept_name": { "type": "string" },
+        "metaphor": { "type": "string" },
+        "pedagogical_walkthrough": { "type": "string" },
+        "interactive_exercise": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
